@@ -30,6 +30,7 @@ export async function generateFakeData(classesPerGrade = 7) {
         const itemDefs = fakeItems(s.term, level, grade).map((it, i) => ({ ...it, planId, order: i + 1 }))
         const itemIds = (await db.items.bulkAdd(itemDefs, { allKeys: true })) as number[]
         const items = itemDefs.map((it, i) => ({ ...it, id: itemIds[i] }))
+        await db.seteukTemplates.bulkAdd(items.flatMap((it) => fakeTemplates(it.id, it.scoring === 'level' ? it.levels!.map((l) => l.label) : ['상', '중', '하'])))
         for (let c = 1; c <= classesPerGrade; c++) {
           const classId = await db.classes.add({ semesterId, level, grade, classNo: c, subject: '음악' })
           const studentIds = (await db.students.bulkAdd(
@@ -47,6 +48,11 @@ export async function generateFakeData(classesPerGrade = 7) {
       }
     }
   }
+  await db.seteukTemplates.bulkAdd([
+    { itemId: 0, levelLabel: '협력', phrases: ['모둠 활동에서 친구들의 의견을 존중하며 협력하는 태도를 보임', '함께 연주할 때 다른 파트를 배려하며 조화를 이룸'] },
+    { itemId: 0, levelLabel: '성장', phrases: ['꾸준한 연습으로 학기 초보다 실력이 눈에 띄게 향상됨'] },
+    { itemId: 0, levelLabel: '참여', phrases: ['수업 활동에 적극적으로 참여함'] },
+  ])
   await setKv('currentSemesterId', activeId)
   await setKv('privacyAck', true)
 }
@@ -114,6 +120,15 @@ function fakeScores(closed: boolean, classNo: number, items: (FakeItem & { id: n
     })
   })
   return out
+}
+
+function fakeTemplates(itemId: number, levels: string[]) {
+  const bank = [
+    ['{항목}에서 음악적 요소를 정확하게 이해하고 풍부하게 표현함', '{항목}에서 뛰어난 집중력과 표현력을 보임', '{항목}에서 자신만의 해석을 담아 완성도 높게 수행함'],
+    ['{항목}에 성실하게 참여하며 기본 요소를 잘 표현함', '{항목}에서 꾸준히 노력하는 모습을 보임'],
+    ['{항목}에서 기초 요소를 익히기 위해 노력함', '{항목}에 참여하며 점차 자신감을 얻음'],
+  ]
+  return levels.map((levelLabel, i) => ({ itemId, levelLabel, phrases: bank[Math.min(i, bank.length - 1)] }))
 }
 
 function fakeMemos(studentIds: number[]) {

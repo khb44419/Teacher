@@ -116,6 +116,7 @@ export interface RuleSettings {
   itemTypes: string[]
   memoTags: string[]
   quickPhrases: string[]
+  seteukBands?: SeteukBand[] // 점수형 항목의 세특 문구 구간 (없으면 기본값)
   confirmedYear: number | null // 올해 기재요령/학업성적관리규정 확인 학년도
   updatedAt: number
 }
@@ -141,10 +142,17 @@ export interface LibraryItem {
   rubric: string
 }
 
+/** 점수형 항목을 세특 문구 수준으로 나누는 구간: 득점률이 minRatio(%) 이상이면 이 수준 */
+export interface SeteukBand {
+  label: string
+  minRatio: number
+}
+
+/** itemId=0 은 관찰 메모 태그용 템플릿 (levelLabel = 태그 이름) */
 export interface SeteukTemplate {
   id?: number
   itemId: number
-  levelLabel: string // 수준 또는 구간 이름
+  levelLabel: string // 수준(수준형) 또는 구간(점수형) 이름, 태그 템플릿이면 태그 이름
   phrases: string[] // 여러 표현 중 무작위 선택
 }
 

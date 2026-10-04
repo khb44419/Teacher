@@ -1,4 +1,4 @@
-import type { AbsenceReason, RuleSettings } from './types'
+import type { AbsenceReason, RuleSettings, SeteukBand } from './types'
 
 // 기본값일 뿐입니다. 반드시 학교 학업성적관리규정과 일치하는지 확인하세요.
 // (인정점 비율 80/100 은 요구사항의 '예시'이며 법정 기준이 아닙니다.)
@@ -28,6 +28,12 @@ export const defaultAbsenceReasons = (): AbsenceReason[] => [
   r('nosubmit', '미응시·미제출', 'nosubmit', 'minScore', 0),
 ]
 
+export const defaultSeteukBands = (): SeteukBand[] => [
+  { label: '상', minRatio: 80 },
+  { label: '중', minRatio: 60 },
+  { label: '하', minRatio: 0 },
+]
+
 export const defaultRules = (): RuleSettings => ({
   seteukMaxBytes: 1500,
   seteukMaxChars: 500,
@@ -41,6 +47,7 @@ export const defaultRules = (): RuleSettings => ({
   itemTypes: ['실기', '정기시험', '제출물', '관찰'],
   memoTags: ['참여', '성장', '특기', '협력', '태도'],
   quickPhrases: ['적극적으로 참여함', '꾸준히 노력함', '친구를 잘 도와줌'],
+  seteukBands: defaultSeteukBands(),
   confirmedYear: null,
   updatedAt: Date.now(),
 })

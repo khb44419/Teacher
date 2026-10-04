@@ -13,7 +13,8 @@ import { History } from './pages/History'
 import { ScoreEntry } from './pages/ScoreEntry'
 import { Report } from './pages/Report'
 import { Memos } from './pages/Memos'
-import { Placeholder } from './pages/Placeholder'
+import { Seteuk } from './pages/Seteuk'
+import { SeteukTemplates } from './pages/SeteukTemplates'
 
 function Routed() {
   const { ready, semester } = useApp()
@@ -35,7 +36,8 @@ function Routed() {
         <Route path="score" element={<ScoreEntry />} />
         <Route path="memo" element={<Memos />} />
         <Route path="report" element={<Report />} />
-        <Route path="seteuk" element={<Placeholder title="세특" stage={8} />} />
+        <Route path="seteuk" element={<Seteuk />} />
+        <Route path="seteuk/templates" element={<SeteukTemplates />} />
         <Route path="plans" element={<Plans />} />
         <Route path="plans/history" element={<History />} />
         <Route path="plans/:id" element={<PlanDetail />} />
