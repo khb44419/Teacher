@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* 외부 폰트를 쓰지 않고 기기 기본 한글 폰트 사용 (외부 요청 금지 원칙) */
+@theme {
+  --font-sans: "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --color-brand-50: #eef7f6;
+  --color-brand-100: #d5ebe9;
+  --color-brand-600: #2f6f6a;
+  --color-brand-700: #265a56;
+}
+
+html, body, #root { height: 100%; }
+body { background: #f6f7f6; color: #1f2937; font-size: 17px; }
