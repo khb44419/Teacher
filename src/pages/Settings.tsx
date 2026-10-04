@@ -30,7 +30,8 @@ export function Settings() {
       <Card className="space-y-2">
         <Link to="/settings/classes" className="block min-h-11 py-2 font-semibold text-brand-700">👥 학급·학생 관리 →</Link>
         <Link to="/settings/rules" className="block min-h-11 py-2 font-semibold text-brand-700">📜 규정 설정 →</Link>
-        <p className="text-sm text-gray-500">평가 계획(3단계), 백업(9단계)은 단계별로 추가됩니다.</p>
+        <Link to="/plans" className="block min-h-11 py-2 font-semibold text-brand-700">📋 평가 계획 →</Link>
+        <p className="text-sm text-gray-500">백업(9단계)은 단계별로 추가됩니다.</p>
       </Card>
 
       <Card className="space-y-3">

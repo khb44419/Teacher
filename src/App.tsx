@@ -7,6 +7,9 @@ import { Settings } from './pages/Settings'
 import { Classes } from './pages/Classes'
 import { ClassDetail } from './pages/ClassDetail'
 import { Rules } from './pages/Rules'
+import { Plans } from './pages/Plans'
+import { PlanDetail } from './pages/PlanDetail'
+import { History } from './pages/History'
 import { Placeholder } from './pages/Placeholder'
 
 function Routed() {
@@ -29,7 +32,9 @@ function Routed() {
         <Route path="score" element={<Placeholder title="점수 입력" stage={4} />} />
         <Route path="memo" element={<Placeholder title="관찰 메모" stage={7} />} />
         <Route path="report" element={<Placeholder title="성적·세특" stage={5} />} />
-        <Route path="plans" element={<Placeholder title="평가 계획" stage={3} />} />
+        <Route path="plans" element={<Plans />} />
+        <Route path="plans/history" element={<History />} />
+        <Route path="plans/:id" element={<PlanDetail />} />
         <Route path="settings" element={<Settings />} />
         <Route path="settings/rules" element={<Rules />} />
         <Route path="settings/classes" element={<Classes />} />
