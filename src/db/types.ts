@@ -74,7 +74,9 @@ export interface Score {
   status: ScoreStatus
   reasonId?: string // 결시 사유(규정 설정의 사유 id)
   reasonNote?: string
-  computed?: number // 결시 처리 방식으로 계산된 점수
+  computed?: number // (사용 안 함: 결시 처리 점수는 grading.ts에서 그때그때 계산)
+  reassessed?: boolean // 재평가로 입력된 점수
+  useFallback?: boolean // 재평가 불가 → 규정의 대체 처리 적용
   createdAt: number
   updatedAt: number
 }

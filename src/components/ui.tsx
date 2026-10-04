@@ -17,7 +17,7 @@ export function Button({
   return (
     <button
       {...p}
-      className={`min-h-11 min-w-11 px-4 rounded-lg font-semibold disabled:opacity-40 ${variants[variant]} ${className}`}
+      className={`min-h-11 min-w-11 px-4 rounded-lg font-semibold whitespace-nowrap disabled:opacity-40 ${variants[variant]} ${className}`}
     />
   )
 }
