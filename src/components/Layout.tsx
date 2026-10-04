@@ -3,6 +3,8 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
 import { useApp } from '../app/AppContext'
 import { Button, Modal } from './ui'
+import { QuickMemo } from './QuickMemo'
+import { useState } from 'react'
 
 const tabs = [
   { to: '/', label: '대시보드', icon: '🏠' },
@@ -14,6 +16,7 @@ const tabs = [
 
 export function Layout() {
   const { semester, hideNames, setHideNames, privacyAck, ackPrivacy, ready } = useApp()
+  const [memo, setMemo] = useState(false)
   const confirmedYear = useLiveQuery(async () => (await db.rules.get('main'))?.confirmedYear ?? null, [])
   const needConfirm = semester && confirmedYear !== undefined && confirmedYear !== semester.year
   return (
@@ -42,9 +45,14 @@ export function Layout() {
           ⚠ {semester.year}학년도 기재요령과 학교 학업성적관리규정을 확인하셨나요? 눌러서 규정 설정 확인 →
         </Link>
       )}
-      <main className="flex-1 overflow-auto p-4 max-w-5xl w-full mx-auto">
+      <main className="flex-1 overflow-auto p-4 pb-24 max-w-5xl w-full mx-auto">
         <Outlet />
       </main>
+      {semester?.status !== 'closed' && (
+        <button onClick={() => setMemo(true)} aria-label="빠른 메모"
+          className="fixed right-4 bottom-20 z-40 w-14 h-14 rounded-full bg-brand-600 text-white text-2xl shadow-lg hover:bg-brand-700">📝</button>
+      )}
+      {memo && <QuickMemo onClose={() => setMemo(false)} />}
       <nav className="bg-white border-t border-gray-200 grid grid-cols-5 pb-[env(safe-area-inset-bottom)]">
         {tabs.map((t) => (
           <NavLink
