@@ -88,3 +88,27 @@ export async function undo(u: UndoEntry) {
   if (cur) await db.scores.delete(cur.id!)
   if (u.prev) await db.scores.put(u.prev)
 }
+
+/** 엑셀 점수 가져오기: 정상 점수로 덮어쓰기. 덮어쓴 건수 반환. */
+export async function importScores(entries: { studentId: number; itemId: number; value?: number; levelLabel?: string }[]) {
+  const itemIds = [...new Set(entries.map((e) => e.itemId))]
+  for (const id of itemIds) await assertEditableItem(id)
+  let overwritten = 0
+  await db.transaction('rw', db.scores, db.changeLogs, async () => {
+    const now = Date.now()
+    for (const e of entries) {
+      const prev = await getScore(e.studentId, e.itemId)
+      const next: Score = {
+        ...(prev ?? { createdAt: now }), studentId: e.studentId, itemId: e.itemId, status: 'normal',
+        value: e.value, levelLabel: e.levelLabel, updatedAt: now,
+      } as Score
+      delete next.reasonId; delete next.reassessed; delete next.useFallback; delete next.reasonNote
+      if (e.value === undefined) delete next.value
+      if (e.levelLabel === undefined) delete next.levelLabel
+      if (prev) overwritten++
+      await db.scores.put(next)
+    }
+    await db.changeLogs.add({ at: now, target: '점수', detail: `엑셀 점수 가져오기 ${entries.length}건`, after: overwritten ? `기존 ${overwritten}건 덮어씀` : '' })
+  })
+  return overwritten
+}

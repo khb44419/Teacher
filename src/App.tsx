@@ -11,6 +11,7 @@ import { Plans } from './pages/Plans'
 import { PlanDetail } from './pages/PlanDetail'
 import { History } from './pages/History'
 import { ScoreEntry } from './pages/ScoreEntry'
+import { Report } from './pages/Report'
 import { Placeholder } from './pages/Placeholder'
 
 function Routed() {
@@ -32,7 +33,8 @@ function Routed() {
         <Route index element={<Dashboard />} />
         <Route path="score" element={<ScoreEntry />} />
         <Route path="memo" element={<Placeholder title="관찰 메모" stage={7} />} />
-        <Route path="report" element={<Placeholder title="성적·세특" stage={5} />} />
+        <Route path="report" element={<Report />} />
+        <Route path="seteuk" element={<Placeholder title="세특" stage={8} />} />
         <Route path="plans" element={<Plans />} />
         <Route path="plans/history" element={<History />} />
         <Route path="plans/:id" element={<PlanDetail />} />
