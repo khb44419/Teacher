@@ -191,7 +191,7 @@ export function Rules() {
               <div key={r.id} className="border rounded-lg p-3 space-y-2">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <label className="text-sm">사유 이름
-                    <input className={inputCls} defaultValue={r.label} onBlur={(e) => e.target.value.trim() && e.target.value !== r.label && setReason(r.id, { label: e.target.value.trim() })} />
+                    <input key={r.label} className={inputCls} defaultValue={r.label} onBlur={(e) => e.target.value.trim() && e.target.value !== r.label && setReason(r.id, { label: e.target.value.trim() })} />
                   </label>
                   <label className="text-sm">구분
                     <select className={inputCls} value={r.category} onChange={(e) => setReason(r.id, { category: e.target.value as AbsenceReason['category'] })}>

@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
 import { useApp } from '../app/AppContext'
@@ -18,6 +18,7 @@ const tabs = [
 export function Layout() {
   const { semester, hideNames, setHideNames, privacyAck, ackPrivacy, ready } = useApp()
   const [memo, setMemo] = useState(false)
+  const { pathname } = useLocation()
   const hasPin = useLiveQuery(async () => !!(await db.kv.get('pinHash')), [])
   const confirmedYear = useLiveQuery(async () => (await db.rules.get('main'))?.confirmedYear ?? null, [])
   const needConfirm = semester && confirmedYear !== undefined && confirmedYear !== semester.year
@@ -28,7 +29,9 @@ export function Layout() {
           🎵 음악 수행평가
           {semester && (
             <span className="ml-2 text-sm font-normal opacity-90">
-              {semester.year}학년도 {semester.term}학기{semester.status === 'closed' && ' (마감·읽기 전용)'}
+              <span className="hidden sm:inline">{semester.year}학년도 </span>
+              <span className="sm:hidden">{semester.year % 100}-</span>
+              {semester.term}학기{semester.status === 'closed' && ' (마감·읽기 전용)'}
             </span>
           )}
         </div>
@@ -51,7 +54,7 @@ export function Layout() {
       <main className="flex-1 overflow-auto p-4 pb-24 max-w-5xl w-full mx-auto">
         <Outlet />
       </main>
-      {semester?.status !== 'closed' && (
+      {semester?.status !== 'closed' && pathname !== '/score' && (
         <button onClick={() => setMemo(true)} aria-label="빠른 메모"
           className="fixed right-4 bottom-20 z-40 w-14 h-14 rounded-full bg-brand-600 text-white text-2xl shadow-lg hover:bg-brand-700">📝</button>
       )}

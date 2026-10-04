@@ -1,0 +1,9 @@
+# Netlify 배포 설정 (저장소를 비공개로 두고 배포하고 싶을 때)
+[build]
+  command = "npm ci && npm test && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # 개발 기간에만 '가짜 데이터' 버튼을 보이게 하려면 아래 줄의 주석(#)을 지우세요
+  # VITE_SHOW_DEV_TOOLS = "1"
