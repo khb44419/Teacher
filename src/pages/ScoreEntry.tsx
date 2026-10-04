@@ -32,7 +32,9 @@ export function ScoreEntry() {
 
   if (!classId || !cls) return <ClassPicker semesterId={semester?.id} onPick={(c) => go({ class: c, item: undefined })} />
   if (!itemId || !item) return <ItemPicker cls={cls} onPick={(i) => go({ item: i })} onBack={() => go({ class: undefined })} />
-  return <Entry cls={cls} item={item} mode={sp.get('mode') === 'table' ? 'table' : 'seq'} setMode={(m) => go({ mode: m })} onBack={() => go({ item: undefined, mode: undefined })} />
+  const f = sp.get('filter')
+  return <Entry key={`${cls.id}-${item.id}`} cls={cls} item={item} mode={sp.get('mode') === 'table' ? 'table' : 'seq'} initialFilter={f === 'reassess' || f === 'missing' ? f : 'all'}
+    setMode={(m) => go({ mode: m })} onBack={() => go({ item: undefined, mode: undefined, filter: undefined })} />
 }
 
 function ClassPicker({ semesterId, onPick }: { semesterId?: number; onPick: (id: number) => void }) {
@@ -105,7 +107,7 @@ function ItemPicker({ cls, onPick, onBack }: { cls: SchoolClass; onPick: (id: nu
 
 type Dialog = { kind: 'absence' | 'fallback' | 'memo' | 'edit'; student: Student } | null
 
-function Entry({ cls, item, mode, setMode, onBack }: { cls: SchoolClass; item: AssessmentItem; mode: 'seq' | 'table'; setMode: (m: 'seq' | 'table') => void; onBack: () => void }) {
+function Entry({ cls, item, mode, initialFilter, setMode, onBack }: { cls: SchoolClass; item: AssessmentItem; mode: 'seq' | 'table'; initialFilter: 'all' | 'missing' | 'reassess'; setMode: (m: 'seq' | 'table') => void; onBack: () => void }) {
   const { hideNames } = useApp()
   const rules = useLiveQuery(() => db.rules.get('main'), [])
   const plan = useLiveQuery(() => db.plans.get(item.planId), [item.planId])
@@ -120,7 +122,7 @@ function Entry({ cls, item, mode, setMode, onBack }: { cls: SchoolClass; item: A
   const [idx, setIdx] = useState(0)
   const [stack, setStack] = useState<UndoEntry[]>([])
   const [dialog, setDialog] = useState<Dialog>(null)
-  const [filter, setFilter] = useState<'all' | 'missing' | 'reassess'>('all')
+  const [filter, setFilter] = useState<'all' | 'missing' | 'reassess'>(initialFilter)
   const [msg, setMsg] = useState('')
   const active = useMemo(() => activeStudents(students ?? []), [students])
   if (!students || !scores || !rules || !plan) return null
