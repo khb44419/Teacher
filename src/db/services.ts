@@ -146,3 +146,24 @@ export async function copyClasses(fromSemesterId: number, toSemesterId: number):
   })
   return n
 }
+
+export interface ChangeEntry {
+  target: string
+  detail: string
+  before?: string
+  after?: string
+}
+
+export async function logChanges(entries: ChangeEntry[]) {
+  const at = Date.now()
+  await db.changeLogs.bulkAdd(entries.map((e) => ({ ...e, at })))
+}
+
+/** 규정 설정 저장 + 변경 이력 기록 (이전 값 → 새 값) */
+export async function updateRules(patch: Partial<RuleSettings>, entries: ChangeEntry[]) {
+  await getRules()
+  await db.transaction('rw', db.rules, db.changeLogs, async () => {
+    await db.rules.update('main', { ...patch, updatedAt: Date.now() })
+    if (entries.length) await logChanges(entries)
+  })
+}

@@ -1,4 +1,6 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from '../db/db'
 import { useApp } from '../app/AppContext'
 import { Button, Modal } from './ui'
 
@@ -12,6 +14,8 @@ const tabs = [
 
 export function Layout() {
   const { semester, hideNames, setHideNames, privacyAck, ackPrivacy, ready } = useApp()
+  const confirmedYear = useLiveQuery(async () => (await db.rules.get('main'))?.confirmedYear ?? null, [])
+  const needConfirm = semester && confirmedYear !== undefined && confirmedYear !== semester.year
   return (
     <div className="h-full flex flex-col">
       <header className="bg-brand-600 text-white px-4 py-2 flex items-center gap-3">
@@ -33,6 +37,11 @@ export function Layout() {
           이름 가리기
         </label>
       </header>
+      {needConfirm && (
+        <Link to="/settings/rules" className="bg-yellow-100 border-b border-yellow-400 px-4 py-2 text-sm text-center font-semibold">
+          ⚠ {semester.year}학년도 기재요령과 학교 학업성적관리규정을 확인하셨나요? 눌러서 규정 설정 확인 →
+        </Link>
+      )}
       <main className="flex-1 overflow-auto p-4 max-w-5xl w-full mx-auto">
         <Outlet />
       </main>

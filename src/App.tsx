@@ -6,6 +6,7 @@ import { Wizard } from './pages/Wizard'
 import { Settings } from './pages/Settings'
 import { Classes } from './pages/Classes'
 import { ClassDetail } from './pages/ClassDetail'
+import { Rules } from './pages/Rules'
 import { Placeholder } from './pages/Placeholder'
 
 function Routed() {
@@ -30,6 +31,7 @@ function Routed() {
         <Route path="report" element={<Placeholder title="성적·세특" stage={5} />} />
         <Route path="plans" element={<Placeholder title="평가 계획" stage={3} />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="settings/rules" element={<Rules />} />
         <Route path="settings/classes" element={<Classes />} />
         <Route path="settings/classes/:id" element={<ClassDetail />} />
         <Route path="*" element={<Navigate to="/" replace />} />
