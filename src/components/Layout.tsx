@@ -4,6 +4,7 @@ import { db } from '../db/db'
 import { useApp } from '../app/AppContext'
 import { Button, Modal } from './ui'
 import { QuickMemo } from './QuickMemo'
+import { lockNow } from './LockScreen'
 import { useState } from 'react'
 
 const tabs = [
@@ -17,6 +18,7 @@ const tabs = [
 export function Layout() {
   const { semester, hideNames, setHideNames, privacyAck, ackPrivacy, ready } = useApp()
   const [memo, setMemo] = useState(false)
+  const hasPin = useLiveQuery(async () => !!(await db.kv.get('pinHash')), [])
   const confirmedYear = useLiveQuery(async () => (await db.rules.get('main'))?.confirmedYear ?? null, [])
   const needConfirm = semester && confirmedYear !== undefined && confirmedYear !== semester.year
   return (
@@ -30,6 +32,7 @@ export function Layout() {
             </span>
           )}
         </div>
+        {hasPin && <button className="min-h-11 min-w-11 text-xl" onClick={lockNow} aria-label="잠그기" title="잠그기">🔒</button>}
         <label className="flex items-center gap-2 min-h-11 cursor-pointer select-none text-sm">
           <input
             type="checkbox"

@@ -13,6 +13,9 @@ import { History } from './pages/History'
 import { ScoreEntry } from './pages/ScoreEntry'
 import { Report } from './pages/Report'
 import { Memos } from './pages/Memos'
+import { Backup } from './pages/Backup'
+import { LockGate } from './components/LockScreen'
+import { UpdatePrompt } from './components/UpdatePrompt'
 import { Seteuk } from './pages/Seteuk'
 import { SeteukTemplates } from './pages/SeteukTemplates'
 
@@ -42,6 +45,7 @@ function Routed() {
         <Route path="plans/history" element={<History />} />
         <Route path="plans/:id" element={<PlanDetail />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="settings/backup" element={<Backup />} />
         <Route path="settings/rules" element={<Rules />} />
         <Route path="settings/classes" element={<Classes />} />
         <Route path="settings/classes/:id" element={<ClassDetail />} />
@@ -55,9 +59,12 @@ export default function App() {
   // HashRouter: 정적 호스팅(GitHub Pages 등)에서 새로고침해도 404가 나지 않음
   return (
     <AppProvider>
-      <HashRouter>
-        <Routed />
-      </HashRouter>
+      <LockGate>
+        <HashRouter>
+          <Routed />
+        </HashRouter>
+      </LockGate>
+      <UpdatePrompt />
     </AppProvider>
   )
 }

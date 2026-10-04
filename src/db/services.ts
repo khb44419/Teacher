@@ -167,3 +167,14 @@ export async function updateRules(patch: Partial<RuleSettings>, entries: ChangeE
     if (entries.length) await logChanges(entries)
   })
 }
+
+/** 학기 마감: 보관 처리하고 읽기 전용으로 (조회는 계속 가능) */
+export async function setSemesterStatus(semesterId: number, status: Semester['status']) {
+  const s = await db.semesters.get(semesterId)
+  if (!s || s.status === status) return
+  await db.semesters.update(semesterId, { status })
+  await logChanges([{
+    target: '학기', detail: `${s.year}학년도 ${s.term}학기 ${status === 'closed' ? '마감' : '마감 해제'}`,
+    before: s.status === 'closed' ? '마감' : '진행중', after: status === 'closed' ? '마감' : '진행중',
+  }])
+}

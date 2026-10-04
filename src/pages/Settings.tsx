@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, setKv } from '../db/db'
-import { copyClasses, createSemester } from '../db/services'
+import { copyClasses, createSemester, setSemesterStatus } from '../db/services'
 import { clearAll, generateFakeData, SHOW_DEV_TOOLS } from '../db/fakeData'
 import { useApp } from '../app/AppContext'
 import { Button, Card, Field, inputCls, useConfirm } from '../components/ui'
@@ -31,7 +31,8 @@ export function Settings() {
         <Link to="/settings/classes" className="block min-h-11 py-2 font-semibold text-brand-700">👥 학급·학생 관리 →</Link>
         <Link to="/settings/rules" className="block min-h-11 py-2 font-semibold text-brand-700">📜 규정 설정 →</Link>
         <Link to="/plans" className="block min-h-11 py-2 font-semibold text-brand-700">📋 평가 계획 →</Link>
-        <p className="text-sm text-gray-500">백업(9단계)은 단계별로 추가됩니다.</p>
+        <Link to="/settings/backup" className="block min-h-11 py-2 font-semibold text-brand-700">💾 백업·복원·앱 잠금 →</Link>
+        <Link to="/plans/history" className="block min-h-11 py-2 font-semibold text-brand-700">🕘 변경 이력 →</Link>
       </Card>
 
       <Card className="space-y-3">
@@ -43,6 +44,11 @@ export function Settings() {
                 {s.year}학년도 {s.term}학기 {s.status === 'closed' && '(마감)'} {s.id === semester?.id && <b className="text-brand-700">· 사용 중</b>}
               </span>
               {s.id !== semester?.id && <Button variant="secondary" onClick={() => setKv('currentSemesterId', s.id)}>이 학기로 전환</Button>}
+              {s.status === 'active' ? (
+                <Button variant="ghost" onClick={() => ask(`${s.year}학년도 ${s.term}학기를 마감합니다.\n마감하면 점수·평가 계획·메모·세특이 읽기 전용이 되고, 조회와 엑셀 내보내기는 계속 할 수 있습니다.\n마감 전에 백업을 권합니다.`, () => void setSemesterStatus(s.id!, 'closed'), '학기 마감')}>학기 마감</Button>
+              ) : (
+                <Button variant="ghost" onClick={() => ask(`${s.year}학년도 ${s.term}학기 마감을 해제해 다시 수정할 수 있게 합니다.`, () => void setSemesterStatus(s.id!, 'active'), '마감 해제')}>마감 해제</Button>
+              )}
             </li>
           ))}
         </ul>
