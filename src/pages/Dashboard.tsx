@@ -35,7 +35,7 @@ export function Dashboard() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <h1 className="text-xl font-bold flex-1">안녕하세요, 선생님 👋</h1>
+        <h1 className="text-xl font-bold flex-1">안녕하세요, 이정애 선생님 👋</h1>
         <HelpButton topic="home" />
       </div>
 

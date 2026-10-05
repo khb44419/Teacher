@@ -48,6 +48,7 @@ export function Plans() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 flex-wrap">
+        <Link to="/settings" className="text-brand-700 min-h-11 leading-[44px]">← 설정</Link>
         <h1 className="text-xl font-bold flex-1">평가 계획</h1>
         {detailed && <Link to="/plans/history" className="text-brand-700 font-semibold min-h-11 leading-[44px]">🕘 변경 이력</Link>}
         <HelpButton topic="plans" />

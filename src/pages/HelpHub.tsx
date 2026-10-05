@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { guides, situations, type HelpTopic } from '../help/slides'
 import { SlideShow } from '../components/Help'
 import { Card } from '../components/ui'
@@ -8,7 +9,10 @@ export function HelpHub() {
   const entries = Object.entries(guides) as [HelpTopic, (typeof guides)[HelpTopic]][]
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">❓ 사용법 모음</h1>
+      <div className="flex items-center gap-2">
+        <Link to="/settings" className="text-brand-700 min-h-11 leading-[44px]">← 설정</Link>
+        <h1 className="text-xl font-bold flex-1">❓ 사용법 모음</h1>
+      </div>
       <p className="text-gray-700">궁금한 것을 누르면 실제 화면 그림이 자동으로 넘어가며 설명합니다. 화면마다 오른쪽 위 <b>❓ 사용법</b> 버튼으로도 볼 수 있어요.</p>
       {situations.map((sit) => (
         <Card key={sit} className="space-y-2">

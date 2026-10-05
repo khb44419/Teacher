@@ -14,7 +14,7 @@ export function History() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Link to="/plans" className="text-brand-700 min-h-11 leading-[44px]">← 평가 계획</Link>
+        <Link to="/settings" className="text-brand-700 min-h-11 leading-[44px]">← 설정</Link>
         <h1 className="text-xl font-bold flex-1">변경 이력</h1>
         <HelpButton topic="plans" />
       </div>

@@ -3,9 +3,12 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
 import { deleteClass, deleteStudent } from '../db/services'
 import { useApp } from '../app/AppContext'
-import { Button, Card, inputCls, useConfirm } from '../components/ui'
+import { Button, Card, useConfirm } from '../components/ui'
 import type { Student, StudentStatus } from '../db/types'
 import { HelpButton } from '../components/Help'
+
+// inputCls 의 w-full 을 빼고 칸 너비를 따로 정함
+const field = 'min-h-11 px-3 rounded-lg border border-gray-300 bg-white'
 
 export function ClassDetail() {
   const id = Number(useParams().id)
@@ -30,44 +33,37 @@ export function ClassDetail() {
         </h1>
         <HelpButton topic="classes" />
       </div>
+      {/* 휴대폰에서는 학생마다 두 줄(번호·이름 / 상태·비고), 넓은 화면에서는 한 줄 */}
       <Card className="p-0 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-100 text-sm">
-            <tr><th className="p-2 w-14">번호</th><th>이름 (선택)</th><th className="w-28">상태</th><th>비고</th><th className="w-14"></th></tr>
-          </thead>
-          <tbody>
-            {students.map((s) => (
-              <tr key={s.id} className="border-t">
-                <td className="p-2 text-center font-semibold">{s.no}</td>
-                <td className="p-1">
-                  <input
-                    key={`${s.id}-${s.name}`}
-                    className={inputCls}
-                    defaultValue={hideNames ? '' : s.name ?? ''}
-                    placeholder={hideNames ? '(이름 가리기 중)' : '이름 없음'}
-                    disabled={readOnly || hideNames}
-                    onBlur={(e) => e.target.value.trim() !== (s.name ?? '') && patch(s, { name: e.target.value.trim() || undefined })}
-                  />
-                </td>
-                <td className="p-1">
-                  <select className={inputCls} value={s.status} disabled={readOnly} onChange={(e) => patch(s, { status: e.target.value as StudentStatus })}>
-                    <option>재학</option><option>전출</option><option>전입</option>
-                  </select>
-                </td>
-                <td className="p-1">
-                  <input key={`${s.id}-${s.note}`} className={inputCls} defaultValue={s.note ?? ''} disabled={readOnly}
-                    onBlur={(e) => e.target.value !== (s.note ?? '') && patch(s, { note: e.target.value || undefined })} />
-                </td>
-                <td className="p-1">
-                  {!readOnly && (
-                    <Button variant="ghost" aria-label={`${s.no}번 삭제`}
-                      onClick={() => ask(`${s.no}번 학생과 그 학생의 점수·메모를 삭제합니다. 되돌릴 수 없습니다.`, () => void deleteStudent(s.id!), '삭제')}>🗑</Button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ul className="divide-y">
+          {students.map((s) => (
+            <li key={s.id} className="p-2 flex flex-wrap items-center gap-2">
+              <span className="w-10 text-center text-lg font-bold shrink-0">{s.no}</span>
+              <input
+                key={`${s.id}-${s.name}`}
+                className={`${field} flex-1 min-w-0 text-lg`}
+                aria-label={`${s.no}번 이름`}
+                defaultValue={hideNames ? '' : s.name ?? ''}
+                placeholder={hideNames ? '(이름 가리기 중)' : '이름 (선택)'}
+                disabled={readOnly || hideNames}
+                onBlur={(e) => e.target.value.trim() !== (s.name ?? '') && patch(s, { name: e.target.value.trim() || undefined })}
+              />
+              <div className="order-3 sm:order-2 w-full sm:w-auto sm:flex-[1.3] flex gap-2 pl-12 sm:pl-0">
+                <select className={`${field} w-24 shrink-0`} aria-label={`${s.no}번 상태`} value={s.status} disabled={readOnly}
+                  onChange={(e) => patch(s, { status: e.target.value as StudentStatus })}>
+                  <option>재학</option><option>전출</option><option>전입</option>
+                </select>
+                <input key={`${s.id}-${s.note}`} className={`${field} flex-1 min-w-0`} aria-label={`${s.no}번 비고`}
+                  placeholder="비고" defaultValue={s.note ?? ''} disabled={readOnly}
+                  onBlur={(e) => e.target.value !== (s.note ?? '') && patch(s, { note: e.target.value || undefined })} />
+              </div>
+              {!readOnly && (
+                <Button variant="ghost" className="order-2 sm:order-3 px-2" aria-label={`${s.no}번 삭제`}
+                  onClick={() => ask(`${s.no}번 학생과 그 학생의 점수·메모를 삭제합니다. 되돌릴 수 없습니다.`, () => void deleteStudent(s.id!), '삭제')}>🗑</Button>
+              )}
+            </li>
+          ))}
+        </ul>
       </Card>
       {!readOnly && (
         <div className="flex gap-2 flex-wrap">
