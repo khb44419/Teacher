@@ -9,6 +9,7 @@ import { Button, Card, Field, inputCls } from '../components/ui'
 import { useApp } from '../app/AppContext'
 import { enterPractice } from '../db/practice'
 import { HelpButton, SlideShow } from '../components/Help'
+import { Icon } from '../components/Icon'
 
 const STEPS = ['학년도·학기', '학급 만들기', '학생 명단', '규정 확인', '시작하기']
 
@@ -42,12 +43,12 @@ export function Wizard() {
     <div className="max-w-2xl mx-auto p-4 space-y-4">
       {intro && <SlideShow topic="start" onClose={() => { setIntro(false); void setKv('seenIntro', true) }} />}
       <div className="flex items-center gap-2">
-        <h1 className="text-2xl font-bold flex-1">🎵 처음 설정</h1>
+        <h1 className="text-2xl font-bold flex-1"><Icon name="music" /> 처음 설정</h1>
         <HelpButton topic="start" />
       </div>
       {step === 0 && (
-        <div className="bg-purple-50 border border-purple-300 rounded-xl p-4 space-y-2">
-          <p className="font-bold">🎓 처음이라 어떻게 쓰는지 궁금하세요?</p>
+        <div className="bg-lilac rounded-xl p-4 space-y-2">
+          <p className="font-bold"><Icon name="cap" /> 처음이라 어떻게 쓰는지 궁금하세요?</p>
           <p className="text-sm">가짜 학생과 점수가 들어 있는 <b>연습 모드</b>에서 먼저 눌러 볼 수 있습니다. 연습은 진짜 데이터와 완전히 따로입니다.</p>
           <Button variant="secondary" onClick={enterPractice}>먼저 연습해 보기</Button>
         </div>
@@ -87,7 +88,7 @@ export function Wizard() {
         )}
         {step === 3 && rules && (
           <>
-            <p className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 text-sm">
+            <p className="bg-peach rounded-2xl p-3 text-sm">
               ⚠ 아래 값은 <b>기본값</b>입니다. 반드시 <b>우리 학교 학업성적관리규정</b>과 일치하는지 확인하세요.
               자세한 수정은 [설정 → 규정 설정]에서 할 수 있습니다.
             </p>
@@ -110,7 +111,7 @@ export function Wizard() {
         )}
         {step === 4 && (
           <>
-            <p className="text-lg font-bold">준비가 끝났습니다 🎉</p>
+            <p className="text-lg font-bold">준비가 끝났습니다 </p>
             <p>다음은 이번 학기 <b>평가 계획(평가 항목)</b>을 만드는 단계입니다. 평가 항목은 직접 자유롭게 만들 수 있습니다.</p>
             <Button className="w-full" onClick={() => nav('/plans')}>평가 계획 만들기로 이동</Button>
             <Button variant="secondary" className="w-full" onClick={() => nav('/')}>대시보드로 가기</Button>

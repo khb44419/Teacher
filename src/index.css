@@ -3,15 +3,30 @@
 /* 외부 폰트를 쓰지 않고 기기 기본 한글 폰트 사용 (외부 요청 금지 원칙) */
 @theme {
   --font-sans: "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
-  --color-brand-50: #eef7f6;
-  --color-brand-100: #d5ebe9;
-  --color-brand-600: #2f6f6a;
-  --color-brand-700: #265a56;
+  /* 시안 B: 남색 + 파랑 + 파스텔 */
+  --color-brand-50: #eef3fc;
+  --color-brand-100: #dce8fb;
+  --color-brand-600: #2b5bb5;
+  --color-brand-700: #1e4489;
+  --color-navy: #23315c;
+  --color-ink: #1c2541;
+  --color-muted: #55607a;
+  --color-canvas: #f3f5fa;
+  --color-line: #dce2f0;
+  --color-sky: #dce8fb;
+  --color-mint: #ddf2e6;
+  --color-peach: #fcefd6;
+  --color-lilac: #ece4fa;
 }
 
 html, body, #root { height: 100%; }
-body { background: #f6f7f6; color: #1f2937; font-size: 1.0625rem; }
+body { background: var(--color-canvas); color: var(--color-ink); font-size: 1.0625rem; }
 
 /* 사용법 그림 설명: 자동 넘김 진행 막대 */
 @keyframes help-progress { from { width: 0 } to { width: 100% } }
 .help-progress { animation-name: help-progress; animation-timing-function: linear; animation-fill-mode: forwards; }
+
+/* 선 색: 기본값(글자색)이 너무 진해서 연한 선으로 */
+@layer base {
+  *, ::before, ::after { border-color: var(--color-line); }
+}

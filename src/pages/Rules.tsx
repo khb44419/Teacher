@@ -9,6 +9,7 @@ import { limitStatus } from '../lib/bytes'
 import { Button, Card, inputCls, useConfirm } from '../components/ui'
 import type { AbsenceMethod, AbsenceReason, RuleSettings } from '../db/types'
 import { HelpButton } from '../components/Help'
+import { Icon } from '../components/Icon'
 
 const roundNames = { round: '반올림', floor: '버림', ceil: '올림' } as const
 const methodNames: Record<AbsenceMethod, string> = {
@@ -55,7 +56,7 @@ function Setting({ title, desc, onReset, children }: { title: string; desc: Reac
       <div className="flex items-start gap-2">
         <div className="flex-1">
           <div className="font-semibold">{title}</div>
-          <div className="text-sm text-gray-600">{desc}</div>
+          <div className="text-sm text-muted">{desc}</div>
         </div>
         {onReset && <Button variant="ghost" className="text-sm shrink-0" onClick={onReset}>기본값으로 되돌리기</Button>}
       </div>
@@ -134,12 +135,12 @@ export function Rules() {
         <HelpButton topic="rules" />
       </div>
 
-      <div className="sticky top-0 z-10 bg-yellow-50 border border-yellow-400 rounded-lg p-3 text-sm font-semibold">
+      <div className="sticky top-0 z-10 bg-peach rounded-2xl p-3 text-sm font-semibold">
         ⚠ 이 값은 반드시 우리 학교 학업성적관리규정과 일치하는지 확인하세요. (아래 값은 기본값일 뿐입니다)
       </div>
 
       {needConfirm && (
-        <Card className="bg-blue-50 border-blue-300 space-y-2">
+        <Card className="bg-brand-50 space-y-2">
           <p className="font-semibold">올해({semester.year}학년도) 학교생활기록부 기재요령과 학교 학업성적관리규정을 확인하셨나요?</p>
           <Button onClick={() => void updateRules({ confirmedYear: semester.year }, [{ target: '규정 설정 · 확인', detail: `${semester.year}학년도 기재요령·학업성적관리규정 확인` }])}>
             네, 확인했습니다
@@ -147,7 +148,7 @@ export function Rules() {
         </Card>
       )}
       {semester && rules.confirmedYear === semester.year && (
-        <p className="text-sm text-green-700">✅ {semester.year}학년도 규정 확인 완료</p>
+        <p className="text-sm text-green-700">✔ {semester.year}학년도 규정 확인 완료</p>
       )}
 
       <Card>
@@ -172,7 +173,7 @@ export function Rules() {
             <label className="text-sm">영문·숫자·공백<NumField value={rules.byteOther} min={1} max={4} onSave={(v) => set('byteOther', '영문·숫자 바이트', v ?? 1)} /></label>
             <label className="text-sm">줄바꿈<NumField value={rules.byteNewline} min={1} max={4} onSave={(v) => set('byteNewline', '줄바꿈 바이트', v ?? 2)} /></label>
           </div>
-          <p className="text-xs text-gray-500">한글이 아닌 특수문자(“ ” · … 등)는 한글과 같은 바이트로 계산합니다. NEIS에서 실제 값을 확인해 보세요.</p>
+          <p className="text-xs text-muted">한글이 아닌 특수문자(“ ” · … 등)는 한글과 같은 바이트로 계산합니다. NEIS에서 실제 값을 확인해 보세요.</p>
           <textarea className={`${inputCls} min-h-20 py-2`} placeholder="여기에 글을 써 보면 바이트가 계산됩니다 (연습용, 저장되지 않음)" value={sample} onChange={(e) => setSample(e.target.value)} />
           <p className={`font-semibold ${status.over ? 'text-red-600' : ''}`}>
             글자 {status.chars}자 / {status.bytes}바이트 / 남은 {status.remaining}바이트 {status.over && '⚠ 초과'}
@@ -182,7 +183,7 @@ export function Rules() {
 
       <Card>
         <h2 className="font-bold text-lg mb-1">결시(결석) 처리</h2>
-        <p className="text-sm text-gray-600 mb-2">
+        <p className="text-sm text-muted mb-2">
           시·도교육청 시행지침과 학교 학업성적관리규정에 따라 정합니다. 인정점 비율(질병 80% 등)은 <b>예시값</b>이니 학교 규정에 맞게 고치세요.
           인정점의 기준은 &quot;같은 학기 다른 수행평가 항목들의 환산 평균&quot; 또는 &quot;항목 만점&quot; 중에서 고릅니다.
         </p>
@@ -190,7 +191,7 @@ export function Rules() {
           {reasons.map((r) => {
             const usesCredit = r.method === 'credit' || (r.method === 'reassess' && r.fallback === 'credit')
             return (
-              <div key={r.id} className="border rounded-lg p-3 space-y-2">
+              <div key={r.id} className="border rounded-2xl p-3 space-y-2">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <label className="text-sm">사유 이름
                     <input key={r.label} className={inputCls} defaultValue={r.label} onBlur={(e) => e.target.value.trim() && e.target.value !== r.label && setReason(r.id, { label: e.target.value.trim() })} />
@@ -230,9 +231,9 @@ export function Rules() {
                   </div>
                 )}
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">→ {reasonText(r)}</span>
+                  <span className="text-muted">→ {reasonText(r)}</span>
                   <Button variant="ghost" onClick={() => ask(`"${r.label}" 사유를 삭제합니다. (이미 이 사유로 입력된 점수가 있으면 점수 입력 단계에서 문제가 될 수 있습니다)`, () =>
-                    void updateRules({ absenceReasons: reasons.filter((x) => x.id !== r.id) }, [{ target: '규정 설정 · 결시 처리', detail: `사유 삭제: ${r.label}`, before: reasonText(r) }]), '삭제')}>🗑 삭제</Button>
+                    void updateRules({ absenceReasons: reasons.filter((x) => x.id !== r.id) }, [{ target: '규정 설정 · 결시 처리', detail: `사유 삭제: ${r.label}`, before: reasonText(r) }]), '삭제')}><Icon name="trash" /> 삭제</Button>
                 </div>
               </div>
             )
@@ -293,11 +294,11 @@ export function Rules() {
 
       <Card>
         <h2 className="font-bold text-lg mb-2">규정 설정 변경 이력</h2>
-        {!logs?.length && <p className="text-sm text-gray-500">아직 변경 기록이 없습니다.</p>}
+        {!logs?.length && <p className="text-sm text-muted">아직 변경 기록이 없습니다.</p>}
         <ul className="text-sm space-y-1 max-h-72 overflow-auto">
           {logs?.slice(0, 50).map((l) => (
             <li key={l.id} className="border-b py-1">
-              <span className="text-gray-500">{new Date(l.at).toLocaleString('ko-KR')}</span> · {l.target.replace('규정 설정 · ', '')} {l.detail !== l.target.replace('규정 설정 · ', '') && `(${l.detail})`}
+              <span className="text-muted">{new Date(l.at).toLocaleString('ko-KR')}</span> · {l.target.replace('규정 설정 · ', '')} {l.detail !== l.target.replace('규정 설정 · ', '') && `(${l.detail})`}
               {(l.before !== undefined || l.after !== undefined) && <> : {l.before ?? ''} → <b>{l.after ?? ''}</b></>}
             </li>
           ))}

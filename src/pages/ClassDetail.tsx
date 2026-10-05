@@ -6,9 +6,10 @@ import { useApp } from '../app/AppContext'
 import { Button, Card, useConfirm } from '../components/ui'
 import type { Student, StudentStatus } from '../db/types'
 import { HelpButton } from '../components/Help'
+import { Icon } from '../components/Icon'
 
 // inputCls 의 w-full 을 빼고 칸 너비를 따로 정함
-const field = 'min-h-11 px-3 rounded-lg border border-gray-300 bg-white'
+const field = 'min-h-11 px-3 rounded-2xl border border-line bg-white'
 
 export function ClassDetail() {
   const id = Number(useParams().id)
@@ -59,7 +60,7 @@ export function ClassDetail() {
               </div>
               {!readOnly && (
                 <Button variant="ghost" className="order-2 sm:order-3 px-2" aria-label={`${s.no}번 삭제`}
-                  onClick={() => ask(`${s.no}번 학생과 그 학생의 점수·메모를 삭제합니다. 되돌릴 수 없습니다.`, () => void deleteStudent(s.id!), '삭제')}>🗑</Button>
+                  onClick={() => ask(`${s.no}번 학생과 그 학생의 점수·메모를 삭제합니다. 되돌릴 수 없습니다.`, () => void deleteStudent(s.id!), '삭제')}><Icon name="trash" /> </Button>
               )}
             </li>
           ))}

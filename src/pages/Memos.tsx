@@ -11,6 +11,7 @@ import { QuickMemo } from '../components/QuickMemo'
 import { Button, Card, Field, Modal, inputCls, useConfirm } from '../components/ui'
 import type { Memo } from '../db/types'
 import { HelpButton } from '../components/Help'
+import { Icon } from '../components/Icon'
 
 export function Memos() {
   const { semester, hideNames } = useApp()
@@ -48,8 +49,8 @@ export function Memos() {
         <HelpButton topic="memo" />
         <Button onClick={() => setAdding('any')}>＋ 빠른 메모</Button>
       </div>
-      <p className="text-sm text-gray-600">
-        수업 중 학생별 한 줄 관찰을 쌓아 두면 학기말 세특 초안에 쓰입니다. 어느 화면에서든 오른쪽 아래 📝 버튼으로 바로 쓸 수 있습니다.
+      <p className="text-sm text-muted">
+        수업 중 학생별 한 줄 관찰을 쌓아 두면 학기말 세특 초안에 쓰입니다. 어느 화면에서든 오른쪽 아래 남색 메모 버튼으로 바로 쓸 수 있습니다.
         태그·자주 쓰는 문구는 <Link to="/settings/rules" className="text-brand-700 underline">규정 설정</Link>에서 바꿉니다.
       </p>
       <ClassSelect semesterId={semester?.id} value={classId} onChange={(id) => setParam('class', id)} />
@@ -90,21 +91,21 @@ export function Memos() {
             {studentId && <Button variant="secondary" onClick={() => setAdding(studentId)}>＋ 이 학생 메모</Button>}
           </div>
           <Card className="p-0">
-            {!filtered.length && <p className="p-4 text-gray-600">메모가 없습니다.</p>}
+            {!filtered.length && <p className="p-4 text-muted">메모가 없습니다.</p>}
             <ul className="divide-y">
               {filtered.map((m) => {
                 const s = stuOf(m.studentId)
                 return (
                   <li key={m.id} className="p-3 flex gap-2 items-start">
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs text-gray-500">{memoDate(m.createdAt)}{!studentId && s && ` · ${studentLabel(s, hideNames)}`}</div>
+                      <div className="text-xs text-muted">{memoDate(m.createdAt)}{!studentId && s && ` · ${studentLabel(s, hideNames)}`}</div>
                       <div>{m.content}</div>
                       {m.tags.length > 0 && <div className="text-xs text-brand-700">{m.tags.map((t) => `#${t}`).join(' ')}</div>}
                     </div>
                     {semester?.status !== 'closed' && (
                       <>
                         <Button variant="ghost" onClick={() => setEditing(m)}>수정</Button>
-                        <Button variant="ghost" aria-label="메모 삭제" onClick={() => ask('이 메모를 삭제합니다.', () => void deleteMemo(m.id!), '삭제')}>🗑</Button>
+                        <Button variant="ghost" aria-label="메모 삭제" onClick={() => ask('이 메모를 삭제합니다.', () => void deleteMemo(m.id!), '삭제')}><Icon name="trash" /> </Button>
                       </>
                     )}
                   </li>

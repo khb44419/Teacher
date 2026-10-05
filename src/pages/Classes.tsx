@@ -7,6 +7,7 @@ import { BulkClassForm } from '../components/BulkClassForm'
 import { RosterImport } from '../components/RosterImport'
 import { Card, Modal, Button } from '../components/ui'
 import { HelpButton } from '../components/Help'
+import { Icon } from '../components/Icon'
 
 export function Classes() {
   const { semester } = useApp()
@@ -34,11 +35,11 @@ export function Classes() {
         <h1 className="text-xl font-bold flex-1">학급·학생 관리</h1>
         <HelpButton topic="classes" />
       </div>
-      {readOnly && <p className="bg-gray-100 rounded-lg p-3">마감된 학기라 읽기 전용입니다.</p>}
+      {readOnly && <p className="bg-canvas rounded-2xl p-3">마감된 학기라 읽기 전용입니다.</p>}
       {!readOnly && semester?.id && (
         <div className="flex gap-2 flex-wrap">
           <Button onClick={() => setOpen('bulk')}>＋ 학급 일괄 만들기</Button>
-          <Button variant="secondary" onClick={() => setOpen('import')}>📋 명단 가져오기</Button>
+          <Button variant="secondary" onClick={() => setOpen('import')}><Icon name="clipboard" /> 명단 가져오기</Button>
         </div>
       )}
       {data?.length === 0 && <Card>아직 학급이 없습니다. 위 버튼으로 만들어 보세요.</Card>}
@@ -50,10 +51,10 @@ export function Classes() {
               <Link
                 key={c.id}
                 to={`/settings/classes/${c.id}`}
-                className="min-h-14 rounded-lg border border-gray-300 bg-brand-50 flex flex-col items-center justify-center hover:bg-brand-100"
+                className="min-h-14 rounded-2xl border border-line bg-brand-50 flex flex-col items-center justify-center hover:bg-brand-100"
               >
                 <b>{c.classNo}반</b>
-                <span className="text-xs text-gray-600">{c.count}명</span>
+                <span className="text-xs text-muted">{c.count}명</span>
               </Link>
             ))}
           </div>

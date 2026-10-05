@@ -10,6 +10,7 @@ import { ItemEditor } from '../components/ItemEditor'
 import { LibraryDialog } from '../components/LibraryDialog'
 import type { AssessmentItem } from '../db/types'
 import { HelpButton } from '../components/Help'
+import { Icon } from '../components/Icon'
 
 export function PlanDetail() {
   const id = Number(useParams().id)
@@ -51,30 +52,30 @@ export function PlanDetail() {
         <h1 className="text-xl font-bold flex-1">{planLabel(plan)}</h1>
         <HelpButton topic="plans" />
       </div>
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-muted">
         {plan.level === '중' ? '중학교' : '고등학교'} {plan.grade}학년 {classCount}개 학급에 자동 적용됩니다.
         {readOnly && <b> 마감된 학기라 읽기 전용입니다.</b>}
       </p>
-      {err && <p className="bg-red-50 border border-red-300 text-red-700 rounded-lg p-3 text-sm">{err}</p>}
+      {err && <p className="bg-[#FDECEC] text-red-700 rounded-2xl p-3 text-sm">{err}</p>}
 
       {sum !== 100 && (
-        <p className="bg-yellow-50 border border-yellow-400 rounded-lg p-3 text-sm font-semibold">
+        <p className="bg-peach rounded-2xl p-3 text-sm font-semibold">
           ⚠ 반영 비율 합이 {sum}%입니다 (100%가 아닙니다). 저장은 되지만 총점 계산 전에 확인하세요.
         </p>
       )}
       {minPerf !== null && perf < minPerf && (
-        <p className="bg-yellow-50 border border-yellow-400 rounded-lg p-3 text-sm font-semibold">
+        <p className="bg-peach rounded-2xl p-3 text-sm font-semibold">
           ⚠ 수행평가(정기시험 제외) 반영 비율이 {perf}%로, 규정 설정의 최소 반영 비율 {minPerf}%보다 낮습니다.
         </p>
       )}
 
       <Card className="p-0 overflow-hidden">
-        {items.length === 0 && <p className="p-4 text-gray-600">아직 항목이 없습니다. 아래에서 추가하세요.</p>}
+        {items.length === 0 && <p className="p-4 text-muted">아직 항목이 없습니다. 아래에서 추가하세요.</p>}
         <ul>
           {items.map((it, idx) => {
             const n = scoreCounts?.[it.id!] ?? 0
             return (
-              <li key={it.id} className={`border-b last:border-b-0 p-3 flex gap-2 items-start ${it.enabled ? '' : 'bg-gray-50 text-gray-500'}`}>
+              <li key={it.id} className={`border-b last:border-b-0 p-3 flex gap-2 items-start ${it.enabled ? '' : 'bg-canvas text-muted'}`}>
                 {!readOnly && (
                   <div className="flex flex-col">
                     <Button variant="ghost" className="min-h-9 px-2" disabled={idx === 0} aria-label="위로" onClick={() => run(() => moveItem(it.id!, -1))}>▲</Button>
@@ -95,8 +96,8 @@ export function PlanDetail() {
                   <Button variant="secondary" onClick={() => setEditing({ item: it })}>{readOnly ? '보기' : '수정'}</Button>
                   {!readOnly && (
                     <>
-                      {detailed && <Button variant="ghost" title="보관함에 저장" onClick={() => void saveToLibrary(it).then(() => setErr(''))}>🗂 보관</Button>}
-                      <Button variant="ghost" onClick={() => setDelTarget(it)}>🗑</Button>
+                      {detailed && <Button variant="ghost" title="보관함에 저장" onClick={() => void saveToLibrary(it).then(() => setErr(''))}><Icon name="folder" /> 보관</Button>}
+                      <Button variant="ghost" onClick={() => setDelTarget(it)}><Icon name="trash" /> </Button>
                     </>
                   )}
                 </div>
@@ -104,13 +105,13 @@ export function PlanDetail() {
             )
           })}
         </ul>
-        <div className="p-3 bg-gray-50 text-right font-semibold">반영 비율 합계 {sum}%</div>
+        <div className="p-3 bg-canvas text-right font-semibold">반영 비율 합계 {sum}%</div>
       </Card>
 
       {!readOnly && (
         <div className="flex gap-2 flex-wrap">
           <Button onClick={() => setEditing({})}>＋ 새 항목</Button>
-          {detailed && <Button variant="secondary" onClick={() => setLib(true)}>🗂 보관함에서 추가</Button>}
+          {detailed && <Button variant="secondary" onClick={() => setLib(true)}><Icon name="folder" /> 보관함에서 추가</Button>}
           <Button variant="danger" className="ml-auto" onClick={async () => {
             const n = (await Promise.all(items.map((i) => db.scores.where('itemId').equals(i.id!).count()))).reduce((a, b) => a + b, 0)
             ask(`"${planLabel(plan)}" 계획과 항목 ${items.length}개를 삭제합니다.` + (n ? `\n⚠ 입력된 점수 ${n}건도 함께 삭제됩니다.` : '') + '\n되돌릴 수 없습니다.',
@@ -142,7 +143,7 @@ function DeleteBody({ item, onCancel, onHide, onDelete }: { item: AssessmentItem
       {n > 0 ? (
         <>
           <p>&quot;{item.name}&quot;에는 <b>점수 {n}건</b>이 입력되어 있습니다. 삭제하면 점수도 함께 사라지고 되돌릴 수 없습니다.</p>
-          <p className="text-sm text-gray-600">지우지 않고 숨기려면 &quot;사용 안 함&quot;을 선택하세요. 점수는 남고 합산·입력 화면에서만 빠집니다.</p>
+          <p className="text-sm text-muted">지우지 않고 숨기려면 &quot;사용 안 함&quot;을 선택하세요. 점수는 남고 합산·입력 화면에서만 빠집니다.</p>
           <Button className="w-full" onClick={onHide}>삭제하지 않고 &quot;사용 안 함&quot;으로 숨기기 (추천)</Button>
         </>
       ) : (

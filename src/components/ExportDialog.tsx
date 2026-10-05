@@ -55,7 +55,7 @@ export function ExportDialog({ cls, onClose }: { cls: SchoolClass; onClose: () =
   }
 
   return (
-    <Modal title="📤 엑셀 내보내기" onClose={onClose}>
+    <Modal title="엑셀 내보내기" onClose={onClose}>
       <div className="space-y-4">
         <div>
           <div className="font-semibold mb-1">범위</div>
@@ -69,7 +69,7 @@ export function ExportDialog({ cls, onClose }: { cls: SchoolClass; onClose: () =
           <div className="font-semibold mb-1">열 순서 (NEIS 입력 순서에 맞춰 조정)</div>
           <ul className="space-y-1">
             {cols.map((c, i) => (
-              <li key={c.key} className="flex items-center gap-2 border rounded-lg px-2">
+              <li key={c.key} className="flex items-center gap-2 border rounded-2xl px-2">
                 <input type="checkbox" className="w-5 h-5" checked={c.on} aria-label={`${exportColumnNames[c.key]} 포함`}
                   onChange={(e) => saveCols(cols.map((x) => (x.key === c.key ? { ...x, on: e.target.checked } : x)))} />
                 <span className="flex-1">{exportColumnNames[c.key]}</span>
@@ -83,7 +83,7 @@ export function ExportDialog({ cls, onClose }: { cls: SchoolClass; onClose: () =
           <input type="checkbox" className="w-5 h-5" checked={includeNames} onChange={(e) => setIncludeNames(e.target.checked)} />
           이름 포함 (끄면 번호만 내보냄)
         </label>
-        <p className="text-xs text-gray-600">학생은 번호순입니다. 결시 처리로 계산된 점수는 숫자로 들어가고 &quot;결시 처리 표시&quot; 열에 처리 내용이 적힙니다. 미입력은 빈칸입니다.</p>
+        <p className="text-xs text-muted">학생은 번호순입니다. 결시 처리로 계산된 점수는 숫자로 들어가고 &quot;결시 처리 표시&quot; 열에 처리 내용이 적힙니다. 미입력은 빈칸입니다.</p>
         <p className="text-xs text-orange-700">⚠ 내려받은 파일에는 학생 정보가 들어 있습니다. 보관·전송에 주의하세요.</p>
         {msg && <p className="text-green-700">{msg}</p>}
         <Button className="w-full" onClick={() => void run()} disabled={busy}>{busy ? '만드는 중…' : '엑셀 파일 만들기'}</Button>

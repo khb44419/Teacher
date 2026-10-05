@@ -5,6 +5,7 @@ import { addItem, affectedStudentCount, itemScoreCount, updateItem, usedLevelLab
 import { defaultLevels, itemErrors, type ItemDraft } from '../lib/plans'
 import type { AssessmentItem, LevelDef } from '../db/types'
 import { Button, Field, Modal, inputCls } from './ui'
+import { Icon } from './Icon'
 
 const num = (s: string) => (s.trim() === '' ? NaN : Number(s))
 
@@ -90,7 +91,7 @@ export function ItemEditor({ planId, item, initial, readOnly, onClose }: Props) 
         <div>
           <span className="block text-sm font-semibold mb-1">② 어떻게 매기나요?</span>
           <div className="grid grid-cols-2 gap-2">
-            <Button variant={scoring === 'score' ? 'primary' : 'secondary'} className="min-h-14" onClick={() => setScoring('score')}>🔢 점수로</Button>
+            <Button variant={scoring === 'score' ? 'primary' : 'secondary'} className="min-h-14" onClick={() => setScoring('score')}><Icon name="hash" /> 점수로</Button>
             <Button variant={scoring === 'level' ? 'primary' : 'secondary'} className="min-h-14" onClick={() => {
               setScoring('level')
               if (levels.length === 0) setLevels(defaultLevels(num(max) || 20).map((l) => ({ label: l.label, score: String(l.score) })))
@@ -102,7 +103,7 @@ export function ItemEditor({ planId, item, initial, readOnly, onClose }: Props) 
           <Field label="④ 반영 비율(%)" hint="성적에서 차지하는 비중"><input className={inputCls} type="number" inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} /></Field>
         </div>
         {scoring === 'level' && (
-          <div className="border rounded-lg p-3 space-y-2">
+          <div className="border rounded-2xl p-3 space-y-2">
             <div className="font-semibold text-sm">수준과 환산 점수</div>
             {levels.map((l, i) => (
               <div key={i} className="flex gap-2 items-center">
@@ -114,7 +115,7 @@ export function ItemEditor({ planId, item, initial, readOnly, onClose }: Props) 
             <Button variant="secondary" onClick={() => setLevels([...levels, { label: '', score: '' }])}>＋ 수준 추가</Button>
           </div>
         )}
-        <details open={moreOpen} onToggle={(e) => setMoreOpen((e.target as HTMLDetailsElement).open)} className="border rounded-lg">
+        <details open={moreOpen} onToggle={(e) => setMoreOpen((e.target as HTMLDetailsElement).open)} className="border rounded-2xl">
           <summary className="cursor-pointer min-h-12 py-3 px-3 font-semibold text-brand-700">더 보기 (평가 유형, 기본 점수, 평가 기준, 평가 기간, 사용 여부)</summary>
           <div className="space-y-3 p-3 pt-0">
             <div className="grid grid-cols-2 gap-3">
@@ -139,13 +140,13 @@ export function ItemEditor({ planId, item, initial, readOnly, onClose }: Props) 
       </fieldset>
 
       {errors.length > 0 && (
-        <ul className="mt-3 bg-red-50 border border-red-300 text-red-700 rounded-lg p-3 text-sm list-disc pl-6">
+        <ul className="mt-3 bg-[#FDECEC] text-red-700 rounded-2xl p-3 text-sm list-disc pl-6">
           {errors.map((e) => <li key={e}>{e}</li>)}
         </ul>
       )}
 
       {confirm && item && (
-        <div className="mt-3 bg-yellow-50 border border-yellow-400 rounded-lg p-3 space-y-2 text-sm">
+        <div className="mt-3 bg-peach rounded-2xl p-3 space-y-2 text-sm">
           <p className="font-bold">이미 점수가 입력된 항목입니다 ({confirm.n}건, 학생 {confirm.aff}명)</p>
           {confirm.weightChanged && (
             <p>• 반영 비율 {item.weight}% → {num(weight)}%: 총점이 <b>바로 바뀌는 학생 {confirm.aff}명</b> (점수가 입력된 학생 기준)</p>

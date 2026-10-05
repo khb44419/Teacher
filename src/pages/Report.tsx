@@ -15,16 +15,17 @@ import { ImportScoresDialog } from '../components/ImportScoresDialog'
 import { Button, Card } from '../components/ui'
 import type { AssessmentItem } from '../db/types'
 import { HelpButton } from '../components/Help'
+import { Icon } from '../components/Icon'
 
 function Cell({ r, item }: { r?: ItemResult; item: AssessmentItem }) {
   if (!r || r.kind === 'missing') return <td className="p-2 text-center bg-red-50 text-red-700 text-xs">미입력</td>
-  if (r.kind === 'pending') return <td className="p-2 text-center bg-yellow-100 text-yellow-800 text-xs" title={r.note}>🔁 대기</td>
+  if (r.kind === 'pending') return <td className="p-2 text-center bg-yellow-100 text-yellow-800 text-xs" title={r.note}><Icon name="repeat" /> 대기</td>
   const lv = item.scoring === 'level' ? item.levels?.find((l) => l.score === r.points)?.label : undefined
   const v = formatPoints(r.points)
   if (r.kind === 'absence') return <td className="p-2 text-center bg-orange-100 text-orange-900" title={r.note}>※{v}</td>
   return (
     <td className="p-2 text-center" title={r.note}>
-      {lv ? <>{lv} <span className="text-xs text-gray-500">{v}</span></> : v}
+      {lv ? <>{lv} <span className="text-xs text-muted">{v}</span></> : v}
       {r.kind === 'reassessed' && <sup className="text-brand-700 font-bold">재</sup>}
     </td>
   )
@@ -37,16 +38,16 @@ function Histogram({ bins, title }: { bins: number[]; title: string }) {
   return (
     <figure className="min-w-0">
       <figcaption className="text-sm font-semibold mb-1 truncate">{title}</figcaption>
-      <div className="flex items-end gap-0.5 h-28 border-b border-gray-300" role="img"
+      <div className="flex items-end gap-0.5 h-28 border-b border-line" role="img"
         aria-label={`${title} 분포: ${labels.map((l, i) => `${l} ${bins[i]}명`).join(', ')}`}>
         {bins.map((b, i) => (
           <div key={i} className="flex-1 flex flex-col items-center justify-end h-full group" title={`${labels[i]}: ${b}명`}>
-            <span className="text-xs text-gray-700">{b > 0 ? b : ''}</span>
+            <span className="text-xs text-ink">{b > 0 ? b : ''}</span>
             <div className="w-full max-w-8 bg-brand-600 rounded-t group-hover:bg-brand-700" style={{ height: `${(b / max) * 85}%`, minHeight: b ? 2 : 0 }} />
           </div>
         ))}
       </div>
-      <div className="flex gap-0.5 text-[10px] text-gray-500">{labels.map((l) => <span key={l} className="flex-1 text-center">{l.replace('%', '')}</span>)}</div>
+      <div className="flex gap-0.5 text-[10px] text-muted">{labels.map((l) => <span key={l} className="flex-1 text-center">{l.replace('%', '')}</span>)}</div>
     </figure>
   )
 }
@@ -76,8 +77,8 @@ export function Report() {
       </div>
       <div className="flex gap-2 flex-wrap items-center">
         <div className="flex-1 min-w-48"><ClassSelect semesterId={semester?.id} value={classId} onChange={(id) => setSp({ class: String(id) })} /></div>
-        {data && <Button variant="secondary" onClick={() => setDlg('export')}>📤 엑셀 내보내기</Button>}
-        {semester?.status !== 'closed' && <Button variant="secondary" onClick={() => setDlg('import')}>📥 점수 가져오기</Button>}
+        {data && <Button variant="secondary" onClick={() => setDlg('export')}><Icon name="upload" /> 엑셀 내보내기</Button>}
+        {semester?.status !== 'closed' && <Button variant="secondary" onClick={() => setDlg('import')}><Icon name="download" /> 점수 가져오기</Button>}
       </div>
 
       {!classId && <Card>학급을 선택하면 성적표가 나옵니다.</Card>}
@@ -86,7 +87,7 @@ export function Report() {
       {data?.plan && (
         <>
           {weightSum(data.items) !== 100 && (
-            <p className="text-sm text-gray-600">참고: 반영 비율 합이 {weightSum(data.items)}%라서 총점이 100점 만점이 아닙니다. (평가 계획에서 고칠 수 있어요)</p>
+            <p className="text-sm text-muted">참고: 반영 비율 합이 {weightSum(data.items)}%라서 총점이 100점 만점이 아닙니다. (평가 계획에서 고칠 수 있어요)</p>
           )}
           <div className="flex gap-2 items-center flex-wrap text-sm">
             <span>정렬:</span>
@@ -95,11 +96,11 @@ export function Report() {
           </div>
           <div className="overflow-auto bg-white border rounded-xl max-h-[65vh]">
             <table className="min-w-full text-sm">
-              <thead className="bg-gray-100 sticky top-0 z-10">
+              <thead className="bg-canvas sticky top-0 z-10">
                 <tr>
-                  <th className="p-2 text-left sticky left-0 bg-gray-100">학생</th>
+                  <th className="p-2 text-left sticky left-0 bg-canvas">학생</th>
                   {data.report.items.map((i) => (
-                    <th key={i.id} className="p-2 whitespace-nowrap">{i.name}<div className="text-xs font-normal text-gray-500">{i.maxScore}점·{i.weight}%</div></th>
+                    <th key={i.id} className="p-2 whitespace-nowrap">{i.name}<div className="text-xs font-normal text-muted">{i.maxScore}점·{i.weight}%</div></th>
                   ))}
                   <th className="p-2 whitespace-nowrap">총점</th>
                 </tr>
@@ -111,21 +112,21 @@ export function Report() {
                       {studentLabel(student, hideNames)}{student.status !== '재학' && <span className="ml-1 text-xs border rounded px-1">{student.status}</span>}
                     </td>
                     {data.report.items.map((i) => <Cell key={i.id} r={result.items[i.id!]} item={i} />)}
-                    <td className="p-2 text-center font-bold">{result.total ?? '-'}{!result.complete && result.total !== undefined && <span className="text-xs text-gray-500 font-normal"> (미완)</span>}</td>
+                    <td className="p-2 text-center font-bold">{result.total ?? '-'}{!result.complete && result.total !== undefined && <span className="text-xs text-muted font-normal"> (미완)</span>}</td>
                   </tr>
                 ))}
               </tbody>
-              <tfoot className="bg-gray-50 sticky bottom-0">
+              <tfoot className="bg-canvas sticky bottom-0">
                 <tr className="border-t-2 font-semibold">
-                  <td className="p-2 sticky left-0 bg-gray-50">학급 평균</td>
+                  <td className="p-2 sticky left-0 bg-canvas">학급 평균</td>
                   {data.report.itemStats.map((s) => <td key={s.itemId} className="p-2 text-center">{s.avg ?? '-'}</td>)}
                   <td className="p-2 text-center">{data.report.totalAvg ?? '-'}</td>
                 </tr>
               </tfoot>
             </table>
           </div>
-          <p className="text-xs text-gray-600">
-            표시: <span className="bg-orange-100 px-1">※ 결시 처리 점수</span> <span className="bg-yellow-100 px-1">🔁 재평가 대기</span> <span className="bg-red-50 px-1">미입력</span> <sup className="text-brand-700 font-bold">재</sup> 재평가 점수 · (미완) 아직 입력이 끝나지 않은 총점 · 칸에 마우스를 올리면 처리 내용이 보입니다. 전출 학생은 평균에서 제외됩니다.
+          <p className="text-xs text-muted">
+            표시: <span className="bg-orange-100 px-1">※ 결시 처리 점수</span> <span className="bg-yellow-100 px-1"><Icon name="repeat" /> 재평가 대기</span> <span className="bg-red-50 px-1">미입력</span> <sup className="text-brand-700 font-bold">재</sup> 재평가 점수 · (미완) 아직 입력이 끝나지 않은 총점 · 칸에 마우스를 올리면 처리 내용이 보입니다. 전출 학생은 평균에서 제외됩니다.
           </p>
           <Card>
             <h2 className="font-bold mb-2">항목별 점수 분포 (득점률 구간별 인원)</h2>

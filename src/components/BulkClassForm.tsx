@@ -44,7 +44,7 @@ export function BulkClassForm({ semesterId, onDone }: { semesterId: number; onDo
         </Field>
       </div>
       <Button onClick={run} disabled={!valid}>학급 만들기</Button>
-      {msg && <p className="text-sm text-green-700">✅ {msg}</p>}
+      {msg && <p className="text-sm text-green-700">✔ {msg}</p>}
     </div>
   )
 }

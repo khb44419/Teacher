@@ -40,8 +40,8 @@ export function CopyPlansDialog({ semesterId, onClose }: { semesterId: number; o
   }
 
   return (
-    <Modal title="📥 다른 평가 계획 불러오기" onClose={onClose}>
-      <p className="text-sm text-gray-600 mb-3">
+    <Modal title="다른 평가 계획 불러오기" onClose={onClose}>
+      <p className="text-sm text-muted mb-3">
         불러온 뒤 바뀐 부분만 고치세요. <b>원본은 바뀌지 않으며</b>, 점수는 가져오지 않고 평가 예정 기간은 비워집니다. 항목에 연결된 세특 문구 템플릿은 함께 복사됩니다.
       </p>
       <label className="block text-sm font-semibold mb-1">어느 학기에서 불러올까요?</label>
@@ -50,29 +50,29 @@ export function CopyPlansDialog({ semesterId, onClose }: { semesterId: number; o
           <option key={s.id} value={s.id}>{s.year}학년도 {s.term}학기{s.id === semesterId ? ' (지금 학기)' : ''}</option>
         ))}
       </select>
-      {!plans?.length && <p className="text-gray-600">이 학기에는 평가 계획이 없습니다.</p>}
+      {!plans?.length && <p className="text-muted">이 학기에는 평가 계획이 없습니다.</p>}
       <ul className="space-y-2">
         {plans?.map((p) => {
           const r = row(p)
           const set = (x: Partial<typeof r>) => setPick({ ...pick, [p.id!]: { ...r, ...x } })
           return (
-            <li key={p.id} className="border rounded-lg p-2 flex items-center gap-2 flex-wrap">
+            <li key={p.id} className="border rounded-2xl p-2 flex items-center gap-2 flex-wrap">
               <input type="checkbox" className="w-5 h-5" checked={r.on} onChange={(e) => set({ on: e.target.checked })} aria-label={`${planLabel(p)} 선택`} />
               <span className="flex-1 min-w-32">
-                {planLabel(p)} <span className="text-xs text-gray-500">(항목 {p.count}개)</span>
+                {planLabel(p)} <span className="text-xs text-muted">(항목 {p.count}개)</span>
               </span>
               <span className="text-sm">→</span>
-              <select className="min-h-11 border rounded-lg px-2" value={r.level} onChange={(e) => set({ level: e.target.value as SchoolLevel })}>
+              <select className="min-h-11 border rounded-2xl px-2" value={r.level} onChange={(e) => set({ level: e.target.value as SchoolLevel })}>
                 <option value="중">중</option><option value="고">고</option>
               </select>
-              <select className="min-h-11 border rounded-lg px-2" value={r.grade} onChange={(e) => set({ grade: +e.target.value })}>
+              <select className="min-h-11 border rounded-2xl px-2" value={r.grade} onChange={(e) => set({ grade: +e.target.value })}>
                 {[1, 2, 3].map((g) => <option key={g} value={g}>{g}학년</option>)}
               </select>
             </li>
           )
         })}
       </ul>
-      {result && <p className="text-green-700 mt-3">✅ {result}</p>}
+      {result && <p className="text-green-700 mt-3">✔ {result}</p>}
       <div className="flex gap-2 justify-end mt-4">
         <Button variant="secondary" onClick={onClose}>닫기</Button>
         <Button onClick={() => void run()} disabled={!plans?.some((p) => row(p).on)}>선택한 계획 불러오기</Button>

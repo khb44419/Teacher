@@ -17,6 +17,7 @@ import { studentLabel } from '../components/StudentName'
 import { Button, Card, Modal, useConfirm } from '../components/ui'
 import type { RuleSettings, Score, Student } from '../db/types'
 import { HelpButton } from '../components/Help'
+import { Icon } from '../components/Icon'
 
 export const SETEUK_TITLE = '교과학습발달상황 - 세부능력 및 특기사항'
 
@@ -62,23 +63,23 @@ export function Seteuk() {
         <div className="flex-1"><ReportTabs /></div>
         <HelpButton topic="seteuk" />
       </div>
-      <div className="sticky top-0 z-20 bg-yellow-50 border border-yellow-400 rounded-lg p-2 text-sm font-semibold">
+      <div className="sticky top-0 z-20 bg-peach rounded-2xl p-2 text-sm font-semibold">
         ⚠ 이 문구는 초안이며 교사가 반드시 검토·수정해야 합니다. ({SETEUK_TITLE}, 최대 {rules.seteukMaxBytes.toLocaleString()}바이트)
       </div>
       <div className="flex gap-2 flex-wrap items-center">
         <div className="flex-1 min-w-48"><ClassSelect semesterId={semester?.id} value={classId} onChange={(id) => setSp({ class: String(id) })} /></div>
-        <Link to="/seteuk/templates" className="min-h-11 px-4 inline-flex items-center rounded-lg border border-gray-300 bg-white font-semibold">🧩 문구 템플릿</Link>
+        <Link to="/seteuk/templates" className="min-h-11 px-4 inline-flex items-center rounded-2xl border border-line bg-white font-semibold"><Icon name="layers" /> 문구 템플릿</Link>
       </div>
-      {msg && <p className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-sm">{msg}</p>}
+      {msg && <p className="bg-brand-50 rounded-2xl p-2 text-sm">{msg}</p>}
       {!classId && <Card>학급을 선택하세요. 문구 템플릿을 먼저 만들어 두면 초안이 더 풍부해집니다.</Card>}
 
       {data && (
         <>
           <div className="flex gap-2 flex-wrap items-center">
             <span className="text-sm font-semibold flex-1">작성 {written}/{data.students.length}명{over.length > 0 && <span className="text-red-600"> · ⚠ 바이트 초과 {over.length}명</span>}</span>
-            {!readOnly && <Button variant="secondary" onClick={() => genAll(false)}>✨ 빈 학생 초안 생성</Button>}
+            {!readOnly && <Button variant="secondary" onClick={() => genAll(false)}><Icon name="sparkle" /> 빈 학생 초안 생성</Button>}
             {!readOnly && <Button variant="ghost" onClick={() => genAll(true)}>전체 다시 생성</Button>}
-            <Button variant="secondary" onClick={() => setExporting(true)}>📤 엑셀 내보내기</Button>
+            <Button variant="secondary" onClick={() => setExporting(true)}><Icon name="upload" /> 엑셀 내보내기</Button>
           </div>
           <div className="grid md:grid-cols-[260px_1fr] gap-3">
             <Card className="p-0 max-h-[60vh] overflow-auto">
@@ -106,7 +107,7 @@ export function Seteuk() {
                   const i = data.students.findIndex((s) => s.id === studentId)
                   if (i < data.students.length - 1) select(data.students[i + 1].id!)
                 }} />
-            ) : <Card className="text-gray-600">왼쪽에서 학생을 고르세요.</Card>}
+            ) : <Card className="text-muted">왼쪽에서 학생을 고르세요.</Card>}
           </div>
         </>
       )}
@@ -163,10 +164,10 @@ function Editor({ classId, student, rules, readOnly, scores, items, onNext }: {
     <Card className="space-y-3">
       <div className="flex items-center gap-2 flex-wrap">
         <h2 className="text-xl font-bold flex-1">{studentLabel(student, hideNames)}</h2>
-        <span className="text-xs text-gray-500">{saved === 'saving' ? '저장 중…' : saved === 'saved' ? '✔ 저장됨' : ''}</span>
-        {!readOnly && <Button variant="secondary" onClick={gen}>✨ 초안 생성</Button>}
+        <span className="text-xs text-muted">{saved === 'saving' ? '저장 중…' : saved === 'saved' ? '✔ 저장됨' : ''}</span>
+        {!readOnly && <Button variant="secondary" onClick={gen}><Icon name="sparkle" /> 초안 생성</Button>}
       </div>
-      <textarea className="w-full min-h-60 p-3 rounded-lg border border-gray-300 leading-relaxed" value={text} readOnly={readOnly}
+      <textarea className="w-full min-h-60 p-3 rounded-2xl border border-line leading-relaxed" value={text} readOnly={readOnly}
         onChange={(e) => change(e.target.value)} aria-label="세부능력 및 특기사항" placeholder="초안 생성을 누르거나 직접 쓰세요." />
       <ByteCounter text={text} rules={rules} />
       <div className="flex justify-end"><Button variant="secondary" onClick={onNext}>다음 학생 ▶</Button></div>
@@ -179,7 +180,7 @@ function Editor({ classId, student, rules, readOnly, scores, items, onNext }: {
           })}
         </ul>
         <ul className="mt-2 space-y-0.5">
-          {memos?.length ? memos.map((m) => <li key={m.id}>📝 {memoDate(m.createdAt)} {m.content} <span className="text-brand-700">{m.tags.map((t) => `#${t}`).join(' ')}</span></li>) : <li className="text-gray-500">관찰 메모가 없습니다.</li>}
+          {memos?.length ? memos.map((m) => <li key={m.id}><Icon name="note" /> {memoDate(m.createdAt)} {m.content} <span className="text-brand-700">{m.tags.map((t) => `#${t}`).join(' ')}</span></li>) : <li className="text-muted">관찰 메모가 없습니다.</li>}
         </ul>
       </details>
       {dialog}
@@ -208,10 +209,10 @@ function ExportSeteuk({ cls, students, text, rules, onClose }: { cls: import('..
     setDone('내보냈습니다.')
   }
   return (
-    <Modal title="📤 세특 엑셀 내보내기" onClose={onClose}>
+    <Modal title="세특 엑셀 내보내기" onClose={onClose}>
       <div className="space-y-3">
         {over.length > 0 ? (
-          <div className="bg-red-50 border border-red-300 rounded-lg p-3">
+          <div className="bg-[#FDECEC] rounded-2xl p-3">
             <p className="font-bold text-red-700">⚠ 바이트를 넘은 학생이 {over.length}명 있습니다 (NEIS에 들어가지 않습니다)</p>
             <ul className="text-sm mt-1">{over.map((s) => <li key={s.id}>• {studentLabel(s, hideNames)}: {limitStatus(text.get(s.id!) ?? '', rules).bytes}바이트</li>)}</ul>
           </div>
@@ -219,7 +220,7 @@ function ExportSeteuk({ cls, students, text, rules, onClose }: { cls: import('..
         <label className="flex items-center gap-2 min-h-11">
           <input type="checkbox" className="w-5 h-5" checked={names} onChange={(e) => setNames(e.target.checked)} /> 이름 포함
         </label>
-        <p className="text-xs text-gray-600">번호순, &quot;바이트 초과&quot; 열 포함. 파일에 학생 정보가 들어 있으니 보관에 주의하세요.</p>
+        <p className="text-xs text-muted">번호순, &quot;바이트 초과&quot; 열 포함. 파일에 학생 정보가 들어 있으니 보관에 주의하세요.</p>
         {done && <p className="text-green-700">{done}</p>}
         <Button className="w-full" variant={over.length ? 'danger' : 'primary'} onClick={() => void run()}>{over.length ? '초과 학생이 있지만 그래도 내보내기' : '내보내기'}</Button>
       </div>

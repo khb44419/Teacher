@@ -10,6 +10,7 @@ import { CopyPlansDialog } from '../components/CopyPlansDialog'
 import { LibraryDialog } from '../components/LibraryDialog'
 import { HelpButton } from '../components/Help'
 import type { SchoolLevel } from '../db/types'
+import { Icon } from '../components/Icon'
 
 export function Plans() {
   const { semester, detailed } = useApp()
@@ -50,26 +51,26 @@ export function Plans() {
       <div className="flex items-center gap-2 flex-wrap">
         <Link to="/settings" className="text-brand-700 min-h-11 leading-[44px]">← 설정</Link>
         <h1 className="text-xl font-bold flex-1">평가 계획</h1>
-        {detailed && <Link to="/plans/history" className="text-brand-700 font-semibold min-h-11 leading-[44px]">🕘 변경 이력</Link>}
+        {detailed && <Link to="/plans/history" className="text-brand-700 font-semibold min-h-11 leading-[44px]"><Icon name="clock" /> 변경 이력</Link>}
         <HelpButton topic="plans" />
       </div>
-      <p className="text-sm text-gray-600">학기 + 학교급 + 학년 + 과목 단위로 계획을 만들면 해당 학년의 모든 반에 자동으로 적용됩니다.</p>
-      {readOnly && <p className="bg-gray-100 rounded-lg p-3">마감된 학기의 평가 계획은 읽기 전용입니다.</p>}
+      <p className="text-sm text-muted">학기 + 학교급 + 학년 + 과목 단위로 계획을 만들면 해당 학년의 모든 반에 자동으로 적용됩니다.</p>
+      {readOnly && <p className="bg-canvas rounded-2xl p-3">마감된 학기의 평가 계획은 읽기 전용입니다.</p>}
       {!readOnly && (
         <div className="flex gap-2 flex-wrap">
           <Button onClick={() => setDlg('new')}>＋ 새 평가 계획</Button>
-          <Button variant="secondary" onClick={() => setDlg('copy')}>📥 지난 학기·다른 학년 계획 불러오기</Button>
-          {detailed && <Button variant="secondary" onClick={() => setDlg('library')}>🗂 항목 보관함</Button>}
+          <Button variant="secondary" onClick={() => setDlg('copy')}><Icon name="download" /> 지난 학기·다른 학년 계획 불러오기</Button>
+          {detailed && <Button variant="secondary" onClick={() => setDlg('library')}><Icon name="folder" /> 항목 보관함</Button>}
         </div>
       )}
-      {msg && <p className="text-sm text-gray-600">{msg}</p>}
+      {msg && <p className="text-sm text-muted">{msg}</p>}
       {plans?.length === 0 && <Card>아직 평가 계획이 없습니다. 위에서 새로 만들거나 지난 학기 계획을 불러오세요.</Card>}
       <div className="grid gap-3 sm:grid-cols-2">
         {plans?.map((p) => (
           <Link key={p.id} to={`/plans/${p.id}`} className="block">
             <Card className="hover:bg-brand-50 space-y-1">
               <div className="font-bold text-lg">{planLabel(p)}</div>
-              <div className="text-sm text-gray-600">항목 {p.items.length}개 · 적용 학급 {p.classCount}개</div>
+              <div className="text-sm text-muted">항목 {p.items.length}개 · 적용 학급 {p.classCount}개</div>
               <div className={`text-sm font-semibold ${p.sum === 100 ? 'text-green-700' : 'text-yellow-700'}`}>
                 {p.sum === 100 ? '✔ 반영 비율 합 100%' : `⚠ 반영 비율 합 ${p.sum}% (100%가 아님)`}
               </div>

@@ -8,16 +8,17 @@ import { enterPractice, exitPractice, resetPractice } from '../db/practice'
 import { useApp } from '../app/AppContext'
 import { HelpButton } from '../components/Help'
 import { Button, Card, Field, inputCls, useConfirm } from '../components/ui'
+import { Icon, type IconName } from '../components/Icon'
 
-function MenuLink({ to, icon, title, desc }: { to: string; icon: string; title: string; desc: string }) {
+function MenuLink({ to, icon, title, desc }: { to: string; icon: IconName; title: string; desc: string }) {
   return (
-    <Link to={to} className="flex items-center gap-3 min-h-16 px-3 rounded-xl border border-gray-200 bg-white hover:bg-brand-50">
-      <span className="text-2xl" aria-hidden>{icon}</span>
+    <Link to={to} className="flex items-center gap-3 min-h-16 px-3 rounded-[18px] bg-white shadow-[0_4px_16px_rgba(28,37,65,0.06)] hover:bg-brand-50">
+      <span className="w-11 h-11 rounded-2xl bg-sky text-brand-600 flex items-center justify-center"><Icon name={icon} size={22} /></span>
       <span className="flex-1">
         <span className="block font-bold">{title}</span>
-        <span className="block text-sm text-gray-600">{desc}</span>
+        <span className="block text-sm text-muted">{desc}</span>
       </span>
-      <span aria-hidden>›</span>
+      <Icon name="next" className="text-muted" />
     </Link>
   )
 }
@@ -27,7 +28,7 @@ function Toggle({ checked, onChange, title, desc }: { checked: boolean; onChange
     <label className="flex items-center gap-3 min-h-16 cursor-pointer">
       <span className="flex-1">
         <span className="block font-bold">{title}</span>
-        <span className="block text-sm text-gray-600">{desc}</span>
+        <span className="block text-sm text-muted">{desc}</span>
       </span>
       <input type="checkbox" role="switch" className="w-7 h-7 accent-brand-600" checked={checked} onChange={(e) => onChange(e.target.checked)} />
     </label>
@@ -59,12 +60,12 @@ export function Settings() {
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2">
-        <MenuLink to="/help" icon="❓" title="사용법 모음" desc="상황별로 그림을 넘겨 가며 배우기" />
-        <MenuLink to="/settings/classes" icon="👥" title="학급·학생 관리" desc="학급 만들기, 명단 넣기, 이름 고치기" />
-        <MenuLink to="/plans" icon="📋" title="평가 계획" desc="이번 학기 평가 항목 만들기·고치기" />
-        <MenuLink to="/settings/backup" icon="💾" title="백업·기기 옮기기" desc="노트북 ↔ 휴대폰, 백업 파일, 앱 잠금" />
-        {detailed && <MenuLink to="/settings/rules" icon="📜" title="규정 설정" desc="세특 바이트, 결시 처리, 소수점" />}
-        {detailed && <MenuLink to="/plans/history" icon="🕘" title="변경 이력" desc="평가 항목·규정을 언제 바꿨는지" />}
+        <MenuLink to="/help" icon="help" title="사용법 모음" desc="상황별로 그림을 넘겨 가며 배우기" />
+        <MenuLink to="/settings/classes" icon="users" title="학급·학생 관리" desc="학급 만들기, 명단 넣기, 이름 고치기" />
+        <MenuLink to="/plans" icon="clipboard" title="평가 계획" desc="이번 학기 평가 항목 만들기·고치기" />
+        <MenuLink to="/settings/backup" icon="save" title="백업·기기 옮기기" desc="노트북 ↔ 휴대폰, 백업 파일, 앱 잠금" />
+        {detailed && <MenuLink to="/settings/rules" icon="shield" title="규정 설정" desc="세특 바이트, 결시 처리, 소수점" />}
+        {detailed && <MenuLink to="/plans/history" icon="clock" title="변경 이력" desc="평가 항목·규정을 언제 바꿨는지" />}
       </div>
 
       <Card className="divide-y">
@@ -73,8 +74,8 @@ export function Settings() {
           desc={<>규정 설정, 변경 이력, 항목 보관함, 엑셀 열 순서 같은 세부 기능도 보여 줍니다. 평소에는 꺼 두셔도 됩니다.</>} />
       </Card>
 
-      <Card className="space-y-2 border-purple-300 bg-purple-50">
-        <h2 className="font-bold text-lg">🎓 연습 모드</h2>
+      <Card className="space-y-2 bg-lilac">
+        <h2 className="font-bold text-lg"><Icon name="cap" /> 연습 모드</h2>
         {practice ? (
           <>
             <p className="text-sm">지금은 연습 중입니다. 연습을 끝내면 연습한 내용은 사라지고 진짜 데이터 화면으로 돌아갑니다.</p>
@@ -132,7 +133,7 @@ export function Settings() {
 
       {SHOW_DEV_TOOLS && !practice && (
         <Card className="space-y-2 border-dashed border-orange-400">
-          <h2 className="font-bold">🧪 개발 도구 (배포 시 숨김)</h2>
+          <h2 className="font-bold"><Icon name="flask" /> 개발 도구 (배포 시 숨김)</h2>
           <Button variant="danger" onClick={() => ask('이 기기의 진짜 데이터를 모두 삭제합니다. 되돌릴 수 없습니다.', async () => { await clearAll(); nav('/setup') }, '모두 삭제')}>
             전체 초기화
           </Button>

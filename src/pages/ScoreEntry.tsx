@@ -14,6 +14,7 @@ import { studentLabel } from '../components/StudentName'
 import { Button, Card, Modal } from '../components/ui'
 import type { AssessmentItem, SchoolClass, Score, Student } from '../db/types'
 import { HelpButton } from '../components/Help'
+import { Icon } from '../components/Icon'
 
 /** 완료 = 점수·수준 입력 또는 결시 처리됨 (재평가 대기는 미완료) */
 export const isDone = (s?: Score) => !!s && s.status !== 'reassess'
@@ -58,7 +59,7 @@ function ClassPicker({ semesterId, onPick }: { semesterId?: number; onPick: (id:
           <h2 className="font-bold mb-2">{name}</h2>
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
             {list.map((c) => (
-              <Button key={c.id} variant="secondary" className="min-h-14 text-lg" onClick={() => onPick(c.id!)}>{c.classNo}반</Button>
+              <Button key={c.id} variant="secondary" className="min-h-14 text-lg rounded-[18px]" onClick={() => onPick(c.id!)}>{c.classNo}반</Button>
             ))}
           </div>
         </Card>
@@ -84,7 +85,7 @@ function ItemPicker({ cls, onPick, onBack }: { cls: SchoolClass; onPick: (id: nu
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" onClick={onBack}>← 학급</Button>
+        <button onClick={onBack} aria-label="학급 고르기로 돌아가기" className="w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0"><Icon name="back" /></button>
         <h1 className="text-xl font-bold flex-1">{classLabel(cls)} · 평가 항목 선택</h1>
         <HelpButton topic="score" />
       </div>
@@ -97,12 +98,12 @@ function ItemPicker({ cls, onPick, onBack }: { cls: SchoolClass; onPick: (id: nu
       <div className="grid gap-2 sm:grid-cols-2">
         {data?.items.map((i) => {
           const status = i.done === data.total && data.total > 0 ? '완료' : i.done > 0 || i.reassess > 0 ? '진행중' : '미시작'
-          const tone = status === '완료' ? 'border-green-500 bg-green-50' : status === '진행중' ? 'border-yellow-400 bg-yellow-50' : 'border-gray-300 bg-white'
+          const tone = status === '완료' ? 'bg-mint' : status === '진행중' ? 'bg-peach' : 'bg-white shadow-sm'
           return (
-            <button key={i.id} onClick={() => onPick(i.id!)} className={`text-left border-2 rounded-xl p-4 min-h-20 ${tone}`}>
+            <button key={i.id} onClick={() => onPick(i.id!)} className={`text-left rounded-[22px] p-4 min-h-20 ${tone}`}>
               <div className="font-bold text-lg">{i.name}</div>
-              <div className="text-sm">{status} · {i.done}/{data.total}명{i.reassess > 0 && ` · 🔁 재평가 대기 ${i.reassess}명`}</div>
-              <div className="text-xs text-gray-600">{i.type} · {i.scoring === 'score' ? `만점 ${i.maxScore}` : '수준형'} · 반영 {i.weight}%</div>
+              <div className="text-sm">{status} · {i.done}/{data.total}명{i.reassess > 0 && ` · 재평가 대기 ${i.reassess}명`}</div>
+              <div className="text-xs text-muted">{i.type} · {i.scoring === 'score' ? `만점 ${i.maxScore}` : '수준형'} · 반영 {i.weight}%</div>
             </button>
           )
         })}
@@ -168,7 +169,7 @@ function Entry({ cls, item, mode, initialFilter, setMode, onBack }: { cls: Schoo
     const after = active.findIndex((s, i) => i > idx && !isDone(scores.get(s.id!)))
     const any = after >= 0 ? after : active.findIndex((s) => !isDone(scores.get(s.id!)))
     if (any >= 0) setIdx(any)
-    else setMsg('모든 학생 입력이 끝났습니다 🎉')
+    else setMsg('모든 학생 입력이 끝났습니다 ')
   }
 
   const card = (s: Student, big: boolean) => (
@@ -194,32 +195,39 @@ function Entry({ cls, item, mode, initialFilter, setMode, onBack }: { cls: Schoo
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 flex-wrap">
-        <Button variant="ghost" onClick={onBack}>← 항목</Button>
-        <h1 className="text-lg font-bold flex-1">{classLabel(cls)} · {item.name} <span className="text-sm font-normal text-gray-600">({planLabel(plan)})</span></h1>
+      <div className="flex items-center gap-2">
+        <button onClick={onBack} aria-label="항목 고르기로 돌아가기" className="w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0"><Icon name="back" /></button>
+        <div className="flex-1 min-w-0 text-center">
+          <h1 className="text-lg font-bold truncate">{item.name}</h1>
+          <p className="text-sm text-muted truncate">{classLabel(cls)} · {planLabel(plan)}</p>
+        </div>
         <HelpButton topic="score" />
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
-        <div className="flex rounded-lg border overflow-hidden">
-          <button className={`min-h-11 px-4 ${mode === 'seq' ? 'bg-brand-600 text-white font-bold' : 'bg-white'}`} onClick={() => setMode('seq')}>순서 모드</button>
-          <button className={`min-h-11 px-4 ${mode === 'table' ? 'bg-brand-600 text-white font-bold' : 'bg-white'}`} onClick={() => setMode('table')}>표 모드</button>
+        <div className="flex p-1 rounded-2xl bg-white shadow-sm">
+          <button className={`min-h-10 px-4 rounded-xl ${mode === 'seq' ? 'bg-navy text-white font-bold' : 'text-muted'}`} onClick={() => setMode('seq')}>순서 모드</button>
+          <button className={`min-h-10 px-4 rounded-xl ${mode === 'table' ? 'bg-navy text-white font-bold' : 'text-muted'}`} onClick={() => setMode('table')}>표 모드</button>
         </div>
-        <div className="flex-1 min-w-40">
-          <div className="text-sm font-semibold">{done}/{active.length}명 완료{reassessCount > 0 && ` · 🔁 재평가 대기 ${reassessCount}명`}</div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden" role="progressbar" aria-valuenow={done} aria-valuemax={active.length}>
-            <div className="h-full bg-brand-600" style={{ width: `${active.length ? (done / active.length) * 100 : 0}%` }} />
-          </div>
-        </div>
+        <div className="flex-1" />
         {!readOnly && (
-          <Button variant="secondary" disabled={!lastUndo} onClick={() => void doUndo()}>
-            ↶ 되돌리기{lastUndoStudent ? ` (${lastUndoStudent.no}번)` : ''}
+          <Button variant="secondary" className="bg-white shadow-sm" disabled={!lastUndo} onClick={() => void doUndo()}>
+            <Icon name="undo" /> 되돌리기{lastUndoStudent ? ` (${lastUndoStudent.no}번)` : ''}
           </Button>
         )}
       </div>
-      {msg && <p className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-sm">{msg}</p>}
+      <div>
+        <div className="flex justify-between text-sm font-semibold mb-1">
+          <span>{done}/{active.length}명 완료</span>
+          {reassessCount > 0 && <span className="text-[#6B4500]">재평가 대기 {reassessCount}명</span>}
+        </div>
+        <div className="h-2 bg-line rounded-full overflow-hidden" role="progressbar" aria-valuenow={done} aria-valuemax={active.length}>
+          <div className="h-full bg-brand-600 rounded-full" style={{ width: `${active.length ? (done / active.length) * 100 : 0}%` }} />
+        </div>
+      </div>
+      {msg && <p className="bg-brand-50 rounded-2xl p-3 text-sm">{msg}</p>}
       {item.rubric && (
-        <details className="bg-white border rounded-lg p-2 text-sm">
+        <details className="bg-white rounded-2xl px-4 py-2 text-sm shadow-sm">
           <summary className="cursor-pointer min-h-8">평가 기준 보기</summary>
           <p className="whitespace-pre-line mt-1">{item.rubric}</p>
         </details>
@@ -227,19 +235,20 @@ function Entry({ cls, item, mode, initialFilter, setMode, onBack }: { cls: Schoo
 
       {mode === 'seq' && cur && (
         <>
-          <Card className="p-5">{card(cur, true)}</Card>
-          <div className="flex gap-2 justify-between">
-            <Button variant="secondary" disabled={idx === 0} onClick={() => { setIdx(idx - 1); setMsg('') }}>◀ 이전</Button>
-            <Button variant="secondary" onClick={nextMissing}>미입력 학생으로</Button>
-            <Button variant="secondary" disabled={idx >= active.length - 1} onClick={() => { setIdx(idx + 1); setMsg('') }}>다음 ▶</Button>
+          <Card className="p-5 rounded-[28px]">{card(cur, true)}</Card>
+          <div className="flex gap-2 items-center justify-between">
+            <Button variant="secondary" className="bg-white shadow-sm rounded-full" disabled={idx === 0} onClick={() => { setIdx(idx - 1); setMsg('') }}><Icon name="back" /> 이전 학생</Button>
+            <span className="text-sm text-muted">{idx + 1} / {active.length}</span>
+            <Button variant="secondary" className="bg-white shadow-sm rounded-full" disabled={idx >= active.length - 1} onClick={() => { setIdx(idx + 1); setMsg('') }}>다음 학생 <Icon name="next" /></Button>
           </div>
-          <div className="flex flex-wrap gap-1">
+          <div className="text-center"><Button variant="ghost" onClick={nextMissing}>아직 안 한 학생으로 가기</Button></div>
+          <div className="flex flex-wrap gap-1.5 justify-center">
             {active.map((s, i) => {
               const sc = scores.get(s.id!)
-              const tone = !sc ? 'bg-white' : sc.status === 'reassess' ? 'bg-yellow-200' : sc.status === 'normal' ? 'bg-green-200' : 'bg-orange-200'
+              const tone = !sc ? 'bg-white' : sc.status === 'reassess' ? 'bg-peach' : sc.status === 'normal' ? 'bg-mint' : 'bg-[#FCE3D6]'
               return (
                 <button key={s.id} onClick={() => setIdx(i)} aria-label={`${s.no}번으로 이동`}
-                  className={`min-w-11 min-h-11 rounded border text-sm ${tone} ${i === idx ? 'ring-2 ring-brand-600 font-bold' : ''}`}>{s.no}</button>
+                  className={`min-w-11 min-h-11 rounded-xl text-sm ${tone} ${i === idx ? 'ring-2 ring-brand-600 font-bold' : ''}`}>{s.no}</button>
               )
             })}
           </div>
@@ -250,8 +259,8 @@ function Entry({ cls, item, mode, initialFilter, setMode, onBack }: { cls: Schoo
       {mode === 'table' && (
         <>
           <div className="flex gap-2">
-            {([['all', '전체'], ['missing', '미입력'], ['reassess', '🔁 재평가 대기']] as const).map(([k, v]) => (
-              <Button key={k} variant={filter === k ? 'primary' : 'secondary'} onClick={() => setFilter(k)}>{v}</Button>
+            {([['all', '전체'], ['missing', '미입력'], ['reassess', '재평가 대기']] as const).map(([k, v]) => (
+              <Button key={k} variant={filter === k ? 'primary' : 'secondary'} className={`rounded-full ${filter === k ? '' : 'bg-white shadow-sm'}`} onClick={() => setFilter(k)}>{v}</Button>
             ))}
           </div>
           <Card className="p-0 overflow-hidden">
@@ -268,7 +277,7 @@ function Entry({ cls, item, mode, initialFilter, setMode, onBack }: { cls: Schoo
                   </li>
                 )
               })}
-              {shown.length === 0 && <li className="p-4 text-gray-600">해당하는 학생이 없습니다.</li>}
+              {shown.length === 0 && <li className="p-4 text-muted">해당하는 학생이 없습니다.</li>}
             </ul>
           </Card>
         </>

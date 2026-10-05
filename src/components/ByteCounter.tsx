@@ -5,7 +5,7 @@ import { limitStatus } from '../lib/bytes'
 export function ByteCounter({ text, rules }: { text: string; rules: RuleSettings }) {
   const s = limitStatus(text, rules)
   return (
-    <p className={`font-semibold ${s.over ? 'text-red-600' : 'text-gray-700'}`} aria-live="polite">
+    <p className={`font-semibold ${s.over ? 'text-red-600' : 'text-ink'}`} aria-live="polite">
       글자 {s.chars}자 · {s.bytes.toLocaleString()} / {rules.seteukMaxBytes.toLocaleString()}바이트 ·{' '}
       {s.over ? `⚠ ${(-s.remaining).toLocaleString()}바이트 초과` : `남은 ${s.remaining.toLocaleString()}바이트`}
     </p>

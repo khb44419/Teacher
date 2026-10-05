@@ -4,6 +4,7 @@ import { db } from '../db/db'
 import { checkPin } from '../lib/backup'
 import { clearAll } from '../db/fakeData'
 import { Button, inputCls, useConfirm } from './ui'
+import { Icon } from './Icon'
 
 const isUnlocked = () => { try { return sessionStorage.getItem('unlocked') === '1' } catch { return false } }
 export const lockNow = () => { try { sessionStorage.removeItem('unlocked') } catch { /* 무시 */ } window.dispatchEvent(new Event('app-lock')) }
@@ -40,15 +41,15 @@ function LockScreen({ pin, onOpen }: { pin: { salt: string; hash: string }; onOp
     else setErr('PIN이 맞지 않습니다')
   }
   return (
-    <div className="h-full flex items-center justify-center p-4 bg-brand-600">
+    <div className="h-full flex items-center justify-center p-4 bg-navy">
       <div className="bg-white rounded-2xl p-6 w-full max-w-sm space-y-4 text-center">
-        <div className="text-4xl">🔒</div>
+        <div className="text-4xl"><Icon name="lock" /> </div>
         <h1 className="text-xl font-bold">음악 수행평가</h1>
         <input className={`${inputCls} text-center text-2xl tracking-widest`} type="password" inputMode="numeric" autoFocus aria-label="PIN"
           value={v} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && void tryOpen()} />
         {err && <p className="text-red-600 text-sm">{err}</p>}
         <Button className="w-full" onClick={() => void tryOpen()}>열기</Button>
-        <button className="text-sm text-gray-500 underline min-h-11" onClick={() => ask(
+        <button className="text-sm text-muted underline min-h-11" onClick={() => ask(
           'PIN을 모르면 이 기기의 데이터를 모두 지우고 처음부터 시작해야 합니다. 그 뒤 백업 파일이 있으면 [설정 → 백업·복원]에서 복원할 수 있습니다.\n이 기기의 데이터가 모두 사라집니다. 계속할까요?',
           async () => { await clearAll(); try { sessionStorage.setItem('unlocked', '1') } catch { /* 무시 */ } location.reload() }, '데이터 지우고 초기화')}>
           PIN을 잊었어요

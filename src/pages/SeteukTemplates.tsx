@@ -10,6 +10,7 @@ import { planLabel } from '../lib/plans'
 import { Button, Card, inputCls } from '../components/ui'
 import type { SeteukBand, SeteukTemplate } from '../db/types'
 import { HelpButton } from '../components/Help'
+import { Icon } from '../components/Icon'
 
 /** 표현 여러 개 = 한 줄에 하나. 칸을 벗어나면 저장. */
 function PhraseBox({ itemId, level, tpl, readOnly, placeholder }: { itemId: number; level: string; tpl?: SeteukTemplate; readOnly: boolean; placeholder: string }) {
@@ -18,7 +19,7 @@ function PhraseBox({ itemId, level, tpl, readOnly, placeholder }: { itemId: numb
   const n = (v ?? initial).split('\n').filter((x) => x.trim()).length
   return (
     <label className="block">
-      <span className="text-sm font-semibold">{level} <span className="font-normal text-gray-500">· 표현 {n}개</span></span>
+      <span className="text-sm font-semibold">{level} <span className="font-normal text-muted">· 표현 {n}개</span></span>
       <textarea className={`${inputCls} min-h-24 py-2 text-sm`} value={v ?? initial} readOnly={readOnly} placeholder={placeholder}
         onChange={(e) => setV(e.target.value)}
         onBlur={() => { if (v !== null && v !== initial) void saveTemplate(itemId, level, v.split('\n')).then(() => setV(null)) }} />
@@ -48,13 +49,13 @@ export function SeteukTemplates() {
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Link to="/seteuk" className="text-brand-700 min-h-11 leading-[44px]">← 세특</Link>
-        <h1 className="text-xl font-bold flex-1">🧩 세특 문구 템플릿</h1>
+        <h1 className="text-xl font-bold flex-1"><Icon name="layers" /> 세특 문구 템플릿</h1>
         <HelpButton topic="templates" />
       </div>
       <Card className="text-sm space-y-1">
         <p>평가 항목·수준별로 문장을 적어 두면, 학생의 점수 수준에 맞는 문장이 골라져 초안이 됩니다. <b>한 줄에 표현 하나</b>씩, 여러 개 적을수록 같은 반 학생들의 문장이 덜 겹칩니다.</p>
-        <p><code className="bg-gray-100 px-1">{'{항목}'}</code>이라고 쓰면 항목 이름으로 바뀝니다. 템플릿은 평가 항목에 붙어 있어서 계획을 다음 학기로 불러오면 함께 복사됩니다.</p>
-        <p className="text-gray-600">학생부에는 교사가 관찰한 내용을 적어야 하므로, 학생이 쓴 글을 그대로 옮기는 기능은 없습니다.</p>
+        <p><code className="bg-canvas px-1">{'{항목}'}</code>이라고 쓰면 항목 이름으로 바뀝니다. 템플릿은 평가 항목에 붙어 있어서 계획을 다음 학기로 불러오면 함께 복사됩니다.</p>
+        <p className="text-muted">학생부에는 교사가 관찰한 내용을 적어야 하므로, 학생이 쓴 글을 그대로 옮기는 기능은 없습니다.</p>
       </Card>
 
       <select className={inputCls} value={planId ?? ''} onChange={(e) => setSp({ plan: e.target.value })} aria-label="평가 계획 선택">
@@ -64,7 +65,7 @@ export function SeteukTemplates() {
 
       {detailed && <Card className="space-y-2">
         <h2 className="font-bold">점수형 항목의 수준 구간</h2>
-        <p className="text-sm text-gray-600">득점률(점수/만점)이 기준 이상이면 그 수준의 문장을 씁니다. 수준형 항목은 항목의 수준 이름을 그대로 씁니다.</p>
+        <p className="text-sm text-muted">득점률(점수/만점)이 기준 이상이면 그 수준의 문장을 씁니다. 수준형 항목은 항목의 수준 이름을 그대로 씁니다.</p>
         {bands.map((b, i) => (
           <div key={i} className="flex gap-2 items-center">
             <input className={inputCls} value={b.label} disabled={readOnly} aria-label="구간 이름"
@@ -88,8 +89,8 @@ export function SeteukTemplates() {
         const levels = it.scoring === 'level' ? (it.levels ?? []).map((l) => l.label) : (rules.seteukBands ?? defaultSeteukBands()).map((b) => b.label)
         return (
           <Card key={it.id} className="space-y-2">
-            <h2 className="font-bold">{it.name} <span className="text-sm font-normal text-gray-600">({it.scoring === 'level' ? '수준형' : '점수형'})</span></h2>
-            {it.rubric && <p className="text-xs text-gray-600 whitespace-pre-line">평가 기준: {it.rubric}</p>}
+            <h2 className="font-bold">{it.name} <span className="text-sm font-normal text-muted">({it.scoring === 'level' ? '수준형' : '점수형'})</span></h2>
+            {it.rubric && <p className="text-xs text-muted whitespace-pre-line">평가 기준: {it.rubric}</p>}
             <div className="grid md:grid-cols-3 gap-3">
               {levels.map((lv) => (
                 <PhraseBox key={`${it.id}-${lv}`} itemId={it.id!} level={lv} tpl={tplOf(it.id!, lv)} readOnly={readOnly}
@@ -102,7 +103,7 @@ export function SeteukTemplates() {
 
       <Card className="space-y-2">
         <h2 className="font-bold">관찰 메모 태그 문구</h2>
-        <p className="text-sm text-gray-600">학생의 관찰 메모에 이 태그가 있으면 문장 하나가 덧붙습니다.</p>
+        <p className="text-sm text-muted">학생의 관찰 메모에 이 태그가 있으면 문장 하나가 덧붙습니다.</p>
         <div className="grid md:grid-cols-3 gap-3">
           {rules.memoTags.map((t) => (
             <PhraseBox key={t} itemId={0} level={t} tpl={tplOf(0, t)} readOnly={readOnly} placeholder={`예: 모둠 활동에서 ${t}하는 모습을 보임`} />

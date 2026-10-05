@@ -10,6 +10,7 @@ import {
 } from '../lib/backup'
 import { downloadBlob, todayStamp } from '../lib/download'
 import { Button, Card, Field, Modal, inputCls, useConfirm } from '../components/ui'
+import { Icon } from '../components/Icon'
 
 const fmt = (t: number) => new Date(t).toLocaleString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short', hour: 'numeric', minute: '2-digit' })
 
@@ -73,8 +74,8 @@ export function Backup() {
     const r = await sendToOtherDevice(usePw ? pw1 : undefined)
     if (r === 'cancelled') return setMsg('보내기를 취소했습니다.')
     setMsg(r === 'shared'
-      ? '✅ 보냈습니다. 받는 기기에서 그 파일을 저장한 뒤 아래 "② 받기"에서 고르세요.'
-      : '✅ 백업 파일을 내려받았습니다(다운로드 폴더). 이 파일을 카카오톡 "나와의 채팅"이나 구글 드라이브로 다른 기기에 보내세요.')
+      ? '✔ 보냈습니다. 받는 기기에서 그 파일을 저장한 뒤 아래 "② 받기"에서 고르세요.'
+      : '✔ 백업 파일을 내려받았습니다(다운로드 폴더). 이 파일을 카카오톡 "나와의 채팅"이나 구글 드라이브로 다른 기기에 보내세요.')
     setPw1(''); setPw2('')
   }
 
@@ -95,7 +96,7 @@ export function Backup() {
     if (!ready) return
     const s = backupSummary(ready)
     const older = isOlderThanDevice(ready, deviceModified)
-    ask(`${older ? '🚨 이 기기의 데이터가 받은 파일보다 더 최근에 바뀌었습니다!\n받으면 이 기기에서 최근에 입력한 내용이 사라집니다.\n\n' : ''}이 기기의 데이터가 모두 지워지고, 받은 파일(${fmt(s.dataModifiedAt)} 기준)의 내용으로 바뀝니다.`, async () => {
+    ask(`${older ? '이 기기의 데이터가 받은 파일보다 더 최근에 바뀌었습니다!\n받으면 이 기기에서 최근에 입력한 내용이 사라집니다.\n\n' : ''}이 기기의 데이터가 모두 지워지고, 받은 파일(${fmt(s.dataModifiedAt)} 기준)의 내용으로 바뀝니다.`, async () => {
       try {
         await restoreAll(db, ready)
         setReady(null)
@@ -108,7 +109,7 @@ export function Backup() {
     return (
       <div className="space-y-4">
         <h1 className="text-xl font-bold">백업·기기 옮기기</h1>
-        <Card>🎓 연습 모드에서는 백업과 기기 옮기기를 쓸 수 없습니다. 연습을 끝낸 뒤 이용하세요.</Card>
+        <Card><Icon name="cap" /> 연습 모드에서는 백업과 기기 옮기기를 쓸 수 없습니다. 연습을 끝낸 뒤 이용하세요.</Card>
         <PinCard pin={pin ?? null} />
       </div>
     )
@@ -123,19 +124,19 @@ export function Backup() {
       </div>
 
       <Card className="space-y-1">
-        <p>🔒 데이터는 <b>이 기기 안에만</b> 있습니다. 노트북과 휴대폰은 서로 자동으로 맞춰지지 않아요.</p>
+        <p><Icon name="lock" /> 데이터는 <b>이 기기 안에만</b> 있습니다. 노트북과 휴대폰은 서로 자동으로 맞춰지지 않아요.</p>
         <p>이 기기 데이터 마지막 변경: <b>{deviceModified ? fmt(deviceModified) : '기록 없음'}</b></p>
         <p>마지막으로 보낸(백업한) 때: <b>{last ? fmt(last) : '없음'}</b></p>
-        {persisted === false && <p className="text-sm text-gray-600">💡 홈 화면에 앱을 설치해 두면 브라우저가 데이터를 더 안전하게 보관합니다.</p>}
+        {persisted === false && <p className="text-sm text-muted">홈 화면에 앱을 설치해 두면 브라우저가 데이터를 더 안전하게 보관합니다.</p>}
       </Card>
 
-      <Card className="bg-blue-50 border-blue-200 space-y-1 text-sm">
-        <p className="font-bold text-base">📱 노트북 ↔ 휴대폰 옮기는 순서</p>
+      <Card className="bg-brand-50 space-y-1 text-sm">
+        <p className="font-bold text-base"><Icon name="phone" /> 노트북 ↔ 휴대폰 옮기는 순서</p>
         <p>1. 방금까지 쓴 기기에서 <b>① 보내기</b></p>
         <p>2. 카카오톡 <b>&quot;나와의 채팅&quot;</b> 또는 <b>구글 드라이브</b>로 파일 보내기</p>
         <p>3. 다른 기기에서 그 파일을 저장(다운로드)</p>
         <p>4. 다른 기기의 이 화면에서 <b>② 받기</b> → 파일 고르기</p>
-        <p className="text-gray-700">⚠ 한 번에 한 기기에서만 입력하세요. 기기를 바꿀 때마다 보내기→받기를 하면 됩니다.</p>
+        <p className="text-ink">⚠ 한 번에 한 기기에서만 입력하세요. 기기를 바꿀 때마다 보내기→받기를 하면 됩니다.</p>
       </Card>
 
       <Card className="space-y-3">
@@ -152,17 +153,17 @@ export function Backup() {
           </div>
         )}
         <div className="flex gap-2 flex-wrap">
-          <Button className="min-h-14 text-lg" onClick={() => void doSend()}>📤 다른 기기로 보내기</Button>
-          <Button variant="secondary" onClick={() => { if (pwOk()) void makeBackupFile(usePw ? pw1 : undefined).then(() => setMsg('✅ 백업 파일을 내려받았습니다. 개인 USB·개인 클라우드 등 안전한 곳에 보관하세요.')) }}>💾 이 기기에 백업 파일 저장</Button>
+          <Button className="min-h-14 text-lg" onClick={() => void doSend()}><Icon name="upload" /> 다른 기기로 보내기</Button>
+          <Button variant="secondary" onClick={() => { if (pwOk()) void makeBackupFile(usePw ? pw1 : undefined).then(() => setMsg('✔ 백업 파일을 내려받았습니다. 개인 USB·개인 클라우드 등 안전한 곳에 보관하세요.')) }}><Icon name="save" /> 이 기기에 백업 파일 저장</Button>
         </div>
         {msg && <p className="text-sm">{msg}</p>}
       </Card>
 
       <Card className="space-y-3">
         <h2 className="font-bold text-lg">② 받기 (복원)</h2>
-        <p className="text-sm text-gray-600">다른 기기에서 보낸 파일(음악평가_백업_….json)을 고르세요.</p>
-        <label className="inline-flex items-center justify-center min-h-14 px-5 rounded-lg bg-white border-2 border-brand-600 text-brand-700 font-bold cursor-pointer">
-          📥 받은 파일 고르기
+        <p className="text-sm text-muted">다른 기기에서 보낸 파일(음악평가_백업_….json)을 고르세요.</p>
+        <label className="inline-flex items-center justify-center min-h-14 px-5 rounded-2xl bg-white border-2 border-brand-600 text-brand-700 font-bold cursor-pointer">
+          받은 파일 고르기
           <input type="file" className="sr-only" accept=".json,application/json" onChange={(e) => { const f = e.target.files?.[0]; if (f) void pick(f); e.target.value = '' }} />
         </label>
         {pending && (
@@ -175,9 +176,9 @@ export function Backup() {
           const s = backupSummary(ready)
           const older = isOlderThanDevice(ready, deviceModified)
           return (
-            <div className={`rounded-lg p-3 text-sm space-y-2 ${older ? 'bg-red-50 border border-red-300' : 'bg-gray-50'}`}>
+            <div className={`rounded-2xl p-3 text-sm space-y-2 ${older ? 'bg-[#FDECEC]' : 'bg-canvas'}`}>
               <p>받은 파일: <b>{fmt(s.dataModifiedAt)}</b> 기준 데이터 · 학생 {s.students}명 · 점수 {s.scores}건 · 메모 {s.memos}건 · 세특 {s.seteuks}건</p>
-              {older && <p className="font-bold text-red-700">🚨 이 기기 데이터({deviceModified ? fmt(deviceModified) : ''})가 받은 파일보다 더 최근입니다. 받으면 최근 입력이 사라져요. 파일이 맞는지 확인하세요.</p>}
+              {older && <p className="font-bold text-red-700"><Icon name="alert" /> 이 기기 데이터({deviceModified ? fmt(deviceModified) : ''})가 받은 파일보다 더 최근입니다. 받으면 최근 입력이 사라져요. 파일이 맞는지 확인하세요.</p>}
               <div className="flex gap-2 flex-wrap">
                 <Button variant="secondary" onClick={() => void makeBackupFile()}>먼저 이 기기 데이터 백업</Button>
                 <Button variant="danger" onClick={doRestore}>이 파일로 바꾸기</Button>
@@ -214,8 +215,8 @@ function PinCard({ pin }: { pin: { salt: string; hash: string } | null }) {
   }
   return (
     <Card className="space-y-2">
-      <h2 className="font-bold text-lg">🔐 앱 잠금 (PIN)</h2>
-      <p className="text-sm text-gray-600">앱을 열 때 숫자 PIN을 묻습니다. 기기를 잠깐 빌려주거나 자리를 비울 때 화면을 가려 줍니다. (데이터 자체를 암호화하지는 않으니 기기 화면 잠금도 꼭 쓰세요)</p>
+      <h2 className="font-bold text-lg"><Icon name="lock" /> 앱 잠금 (PIN)</h2>
+      <p className="text-sm text-muted">앱을 열 때 숫자 PIN을 묻습니다. 기기를 잠깐 빌려주거나 자리를 비울 때 화면을 가려 줍니다. (데이터 자체를 암호화하지는 않으니 기기 화면 잠금도 꼭 쓰세요)</p>
       <p>상태: <b>{pin ? '사용 중' : '사용 안 함'}</b></p>
       <div className="flex gap-2">
         <Button variant="secondary" onClick={() => setMode('set')}>{pin ? 'PIN 바꾸기' : 'PIN 설정'}</Button>

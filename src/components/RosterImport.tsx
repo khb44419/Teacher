@@ -34,7 +34,7 @@ export function RosterImport({ semesterId, onDone }: { semesterId: number; onDon
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-muted">
         열 순서: <b>학년, 반, 번호, 이름</b> (이름은 없어도 됩니다). 엑셀에서 복사해 붙여넣거나 파일(.xlsx/.csv)을 올리세요.
         학교급 열(맨 앞, "중"/"고")이 있으면 함께 읽습니다.
       </p>
@@ -53,15 +53,15 @@ export function RosterImport({ semesterId, onDone }: { semesterId: number; onDon
           setRows(parseTable(e.target.value))
         }}
       />
-      <FilePick label="📂 엑셀·CSV 파일 고르기" accept=".xlsx,.xls,.csv" onFile={async (f) => { setRows(await fileToRows(f)); setText('') }} />
+      <FilePick label="엑셀·CSV 파일 고르기" accept=".xlsx,.xls,.csv" onFile={async (f) => { setRows(await fileToRows(f)); setText('') }} />
       {parsed.length > 0 && (
         <div className="space-y-2">
           <p className="font-semibold">
             미리보기: 정상 {ok}행 / <span className={errors.length ? 'text-red-600' : ''}>오류 {errors.length}행</span> (오류 행은 가져오지 않습니다)
           </p>
-          <div className="max-h-60 overflow-auto border rounded-lg">
+          <div className="max-h-60 overflow-auto border rounded-2xl">
             <table className="w-full text-sm">
-              <thead className="bg-gray-100 sticky top-0">
+              <thead className="bg-canvas sticky top-0">
                 <tr><th className="p-1">행</th><th>학교급</th><th>학년</th><th>반</th><th>번호</th><th>이름</th><th>상태</th></tr>
               </thead>
               <tbody>
@@ -79,7 +79,7 @@ export function RosterImport({ semesterId, onDone }: { semesterId: number; onDon
               </tbody>
             </table>
           </div>
-          {parsed.length > 200 && <p className="text-xs text-gray-500">앞 200행만 표시했습니다 (전체가 가져와집니다).</p>}
+          {parsed.length > 200 && <p className="text-xs text-muted">앞 200행만 표시했습니다 (전체가 가져와집니다).</p>}
           <label className="flex items-center gap-2 min-h-11">
             <input type="checkbox" className="w-5 h-5" checked={createMissing} onChange={(e) => setCreateMissing(e.target.checked)} />
             없는 학급은 자동으로 만들기
@@ -89,11 +89,11 @@ export function RosterImport({ semesterId, onDone }: { semesterId: number; onDon
               <input className={inputCls} value={subject} onChange={(e) => setSubject(e.target.value)} />
             </Field>
           )}
-          <p className="text-xs text-gray-500">이미 있는 번호는 이름만 바뀌고, 점수 등 다른 기록은 그대로 유지됩니다.</p>
+          <p className="text-xs text-muted">이미 있는 번호는 이름만 바뀌고, 점수 등 다른 기록은 그대로 유지됩니다.</p>
           <Button onClick={apply} disabled={ok === 0}>{ok}명 가져오기</Button>
         </div>
       )}
-      {result && <p className="text-green-700">✅ {result}</p>}
+      {result && <p className="text-green-700">✔ {result}</p>}
     </div>
   )
 }

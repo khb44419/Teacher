@@ -45,7 +45,7 @@ export function ImportScoresDialog({ semesterId, onClose }: { semesterId: number
       try {
         const list = includeSpecial ? [...entries, ...special] : entries
         await importScores(list)
-        setMsg(`✅ ${list.length}건을 가져왔습니다.`)
+        setMsg(`✔ ${list.length}건을 가져왔습니다.`)
         setEntries([]); setLoaded(false)
       } catch (e) { setMsg((e as Error).message) }
     }
@@ -55,19 +55,19 @@ export function ImportScoresDialog({ semesterId, onClose }: { semesterId: number
   }
 
   return (
-    <Modal title="📥 점수 가져오기 (엑셀)" onClose={onClose}>
+    <Modal title="점수 가져오기 (엑셀)" onClose={onClose}>
       <div className="space-y-3 text-sm">
         <p>기존 엑셀 점수를 옮겨 올 때 씁니다. 이 앱에서 내보낸 파일 형식을 그대로 쓰면 가장 쉽습니다.</p>
-        <ul className="list-disc pl-5 text-gray-600">
+        <ul className="list-disc pl-5 text-muted">
           <li>시트 이름을 &quot;중1-3&quot;처럼 쓰거나, 학교급·학년·반 열을 넣으세요.</li>
           <li>&quot;번호&quot; 열이 꼭 필요하고, 점수 열 제목은 평가 항목 이름과 같아야 합니다.</li>
           <li>수준형은 수준 이름(상/중/하) 또는 환산 점수. 빈칸은 건너뜁니다.</li>
         </ul>
-        <FilePick label="📂 엑셀 파일 고르기" accept=".xlsx,.xls,.csv" onFile={(f) => void read(f)} />
+        <FilePick label="엑셀 파일 고르기" accept=".xlsx,.xls,.csv" onFile={(f) => void read(f)} />
         {loaded && (
           <div className="space-y-2">
             <p className="font-semibold">가져올 점수 {entries.length + (includeSpecial ? special.length : 0)}건 · 덮어쓰기 {overwrite + (includeSpecial ? special.length : 0)}건 · <span className={errors.length ? 'text-red-600' : ''}>오류 {errors.length}건</span></p>
-            {skipped.same > 0 && <p className="text-gray-600">이미 같은 점수 {skipped.same}건은 건너뜁니다.</p>}
+            {skipped.same > 0 && <p className="text-muted">이미 같은 점수 {skipped.same}건은 건너뜁니다.</p>}
             {special.length > 0 && (
               <label className="flex items-start gap-2 min-h-11 bg-orange-50 rounded p-2">
                 <input type="checkbox" className="w-5 h-5 mt-0.5" checked={includeSpecial} onChange={(e) => setIncludeSpecial(e.target.checked)} />
@@ -75,7 +75,7 @@ export function ImportScoresDialog({ semesterId, onClose }: { semesterId: number
               </label>
             )}
             {errors.length > 0 && (
-              <ul className="max-h-40 overflow-auto bg-red-50 border border-red-200 rounded p-2">
+              <ul className="max-h-40 overflow-auto bg-[#FDECEC] rounded p-2">
                 {errors.slice(0, 100).map((e, i) => <li key={i}>⚠ {e.where}: {e.message}</li>)}
               </ul>
             )}

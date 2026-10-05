@@ -24,19 +24,19 @@ export function History() {
         <option value="규정 설정">규정 설정</option>
       </select>
       <Card>
-        {!logs?.length && <p className="text-gray-600">변경 기록이 없습니다.</p>}
+        {!logs?.length && <p className="text-muted">변경 기록이 없습니다.</p>}
         <ul className="divide-y">
           {logs?.map((l) => (
             <li key={l.id} className="py-2 text-sm">
-              <div className="text-xs text-gray-500">{new Date(l.at).toLocaleString('ko-KR')} · {l.target}</div>
+              <div className="text-xs text-muted">{new Date(l.at).toLocaleString('ko-KR')} · {l.target}</div>
               <div>
                 {l.detail}
-                {(l.before || l.after) && <> : <span className="text-gray-600">{l.before || '(없음)'}</span> → <b>{l.after || '(없음)'}</b></>}
+                {(l.before || l.after) && <> : <span className="text-muted">{l.before || '(없음)'}</span> → <b>{l.after || '(없음)'}</b></>}
               </div>
             </li>
           ))}
         </ul>
-        {logs?.length === 300 && <p className="text-xs text-gray-500 mt-2">최근 300건만 표시했습니다.</p>}
+        {logs?.length === 300 && <p className="text-xs text-muted mt-2">최근 300건만 표시했습니다.</p>}
       </Card>
     </div>
   )

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { guides, type HelpTopic, type Slide } from '../help/slides'
 import { Button } from './ui'
+import { Icon } from './Icon'
 
 const AUTO_MS = 6000
 
@@ -33,7 +34,7 @@ export function SlideShow({ topic, onClose }: { topic: HelpTopic; onClose: () =>
   return (
     <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-2 sm:p-4" onClick={onClose}>
       <div role="dialog" aria-label={`사용법: ${g.title}`} onClick={(e) => e.stopPropagation()}
-        className="bg-white w-full max-w-3xl max-h-[96vh] rounded-2xl flex flex-col overflow-hidden"
+        className="bg-white w-full max-w-3xl max-h-[96vh] rounded-[28px] flex flex-col overflow-hidden"
         onTouchStart={(e) => { touchX.current = e.touches[0].clientX }}
         onTouchEnd={(e) => {
           if (touchX.current === null) return
@@ -42,13 +43,13 @@ export function SlideShow({ topic, onClose }: { topic: HelpTopic; onClose: () =>
           touchX.current = null
         }}>
         <div className="flex items-center gap-2 px-4 py-2 border-b">
-          <h2 className="font-bold text-lg flex-1">❓ {g.title}</h2>
-          <span className="text-sm text-gray-600">{i + 1} / {g.slides.length}</span>
+          <h2 className="font-bold text-lg flex-1 flex items-center gap-2"><Icon name="help" className="text-brand-600" /> {g.title}</h2>
+          <span className="text-sm text-muted">{i + 1} / {g.slides.length}</span>
           <Button variant="ghost" onClick={onClose} aria-label="닫기">✕</Button>
         </div>
         <div className="flex-1 min-h-0 overflow-auto">
           {s.img && (
-            <div className="bg-gray-100 flex justify-center">
+            <div className="bg-canvas flex justify-center">
               <img src={s.img} alt={s.title} className="max-h-[52vh] w-auto object-contain" />
             </div>
           )}
@@ -75,14 +76,14 @@ export function SlideShow({ topic, onClose }: { topic: HelpTopic; onClose: () =>
   )
 }
 
-/** 화면마다 오른쪽 위에 두는 "❓ 사용법" 버튼 */
+/** 화면마다 오른쪽 위에 두는 "사용법" 버튼 */
 export function HelpButton({ topic, label = '사용법' }: { topic: HelpTopic; label?: string }) {
   const [open, setOpen] = useState(false)
   return (
     <>
       <button onClick={() => setOpen(true)}
-        className="min-h-11 px-3 rounded-full border-2 border-brand-600 text-brand-700 font-bold bg-white whitespace-nowrap hover:bg-brand-50">
-        ❓ {label}
+        className="min-h-11 px-4 rounded-full text-brand-700 font-bold bg-white shadow-sm whitespace-nowrap hover:bg-brand-50 inline-flex items-center gap-1.5">
+        <Icon name="help" /> {label}
       </button>
       {open && <SlideShow topic={topic} onClose={() => setOpen(false)} />}
     </>

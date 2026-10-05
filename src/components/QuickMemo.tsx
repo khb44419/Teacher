@@ -44,7 +44,7 @@ export function QuickMemo({ studentId, onClose }: { studentId?: number; onClose:
   }
 
   return (
-    <Modal title="📝 빠른 메모" onClose={onClose}>
+    <Modal title="빠른 메모" onClose={onClose}>
       <div className="space-y-3">
         {fixed ? (
           <p className="text-lg font-bold">{classLabel(fixed.c)} · {studentLabel(fixed.s, hideNames)}</p>
@@ -75,11 +75,11 @@ export function QuickMemo({ studentId, onClose }: { studentId?: number; onClose:
           onKeyDown={(e) => e.key === 'Enter' && void save()} autoFocus={!!studentId} />
         <div className="flex flex-wrap gap-2">
           {rules?.quickPhrases.map((p) => (
-            <button key={p} className="min-h-11 px-3 rounded-lg bg-gray-100 text-sm" onClick={() => setText(text ? `${text} ${p}` : p)}>＋ {p}</button>
+            <button key={p} className="min-h-11 px-3 rounded-2xl bg-canvas text-sm" onClick={() => setText(text ? `${text} ${p}` : p)}>＋ {p}</button>
           ))}
         </div>
         {err && <p className="text-red-600 text-sm">{err}</p>}
-        {saved && <p className="text-green-700 text-sm">✅ {saved}</p>}
+        {saved && <p className="text-green-700 text-sm">✔ {saved}</p>}
         <Button className="w-full" onClick={() => void save()} disabled={!text.trim()}>저장</Button>
       </div>
     </Modal>
