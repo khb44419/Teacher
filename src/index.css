@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
-/* 외부 폰트를 쓰지 않고 기기 기본 한글 폰트 사용 (외부 요청 금지 원칙) */
+/* IBM Plex Sans KR: 앱 안에 포함된 글꼴 (외부 요청 없음). 없으면 기기 기본 한글 글꼴 */
 @theme {
-  --font-sans: "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
   /* 시안 B: 남색 + 파랑 + 파스텔 */
   --color-brand-50: #eef3fc;
   --color-brand-100: #dce8fb;

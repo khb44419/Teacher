@@ -208,7 +208,7 @@ node scripts/capture-help.mjs   # (개발 서버를 켠 상태에서) 사용법 
 npm test         # 단위 테스트 (바이트 계산, 성적 합산, 결시 처리, 백업 등)
 npm run build    # 정적 사이트 빌드 → dist/
 ```
-- 기술: React + TypeScript + Vite, Tailwind CSS, Dexie(IndexedDB), SheetJS(xlsx 0.20.3, cdn.sheetjs.com 공식 배포판), vite-plugin-pwa
+- 기술: React + TypeScript + Vite, Tailwind CSS, IBM Plex Sans KR(@fontsource, 앱에 포함), Dexie(IndexedDB), SheetJS(xlsx 0.20.3, cdn.sheetjs.com 공식 배포판), vite-plugin-pwa
 - **배포**
   - GitHub Pages: `.github/workflows/deploy.yml` (저장소 Settings → Pages → Source: GitHub Actions)
   - Netlify: `netlify.toml` 포함 (저장소를 비공개로 둘 수 있음)

@@ -39,7 +39,7 @@ export function Dashboard() {
         <div className="flex items-start gap-3">
           <div className="flex-1">
             <p className="text-sm text-[#C9D3EE]">{semester.year}학년도 {semester.term}학기</p>
-            <h1 className="text-2xl font-bold leading-snug">안녕하세요,<br />이정애 선생님</h1>
+            <h1 className="text-2xl font-bold leading-snug">안녕하세요,<br />이정애 선생님 👋</h1>
           </div>
           <HelpButton topic="home" />
         </div>
