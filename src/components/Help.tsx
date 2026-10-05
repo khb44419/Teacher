@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { guides, type HelpTopic, type Slide } from '../help/slides'
 import { Button } from './ui'
 import { Icon } from './Icon'
@@ -31,8 +32,9 @@ export function SlideShow({ topic, onClose }: { topic: HelpTopic; onClose: () =>
   }, [i, go, onClose])
 
   const s: Slide = g.slides[i]
-  return (
-    <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-2 sm:p-4" onClick={onClose}>
+  // 화면 전체(body)에 바로 띄움: 버튼이 놓인 곳(예: 남색 카드의 흰 글씨)의 모양을 물려받지 않도록
+  return createPortal(
+    <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-2 sm:p-4 text-ink font-normal text-left" onClick={onClose}>
       <div role="dialog" aria-label={`사용법: ${g.title}`} onClick={(e) => e.stopPropagation()}
         className="bg-white w-full max-w-3xl max-h-[96vh] rounded-[28px] flex flex-col overflow-hidden"
         onTouchStart={(e) => { touchX.current = e.touches[0].clientX }}
@@ -73,7 +75,7 @@ export function SlideShow({ topic, onClose }: { topic: HelpTopic; onClose: () =>
         </div>
       </div>
     </div>
-  )
+  , document.body)
 }
 
 /** 화면마다 오른쪽 위에 두는 "사용법" 버튼 */

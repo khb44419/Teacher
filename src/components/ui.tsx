@@ -1,4 +1,5 @@
 import { useState, type ButtonHTMLAttributes, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { Icon } from './Icon'
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost'
@@ -40,8 +41,9 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
 export const inputCls = 'w-full min-h-11 px-4 rounded-2xl border border-line bg-white focus:border-brand-600 focus:outline-none'
 
 export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
-  return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+  // 화면 전체(body)에 바로 띄워 주변 글자색 등을 물려받지 않게 함
+  return createPortal(
+    <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4 text-ink font-normal text-left" onClick={onClose}>
       <div
         className="bg-white w-full sm:max-w-lg max-h-[90vh] overflow-auto rounded-t-[28px] sm:rounded-[28px] p-5"
         onClick={(e) => e.stopPropagation()}
@@ -55,7 +57,7 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
         {children}
       </div>
     </div>
-  )
+  , document.body)
 }
 
 /** 위험한 작업은 항상 확인 창을 거치도록 하는 훅. confirm(...)이 true를 주면 실행. */
