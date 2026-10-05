@@ -10,6 +10,7 @@ import { ClassSelect } from '../components/ClassSelect'
 import { QuickMemo } from '../components/QuickMemo'
 import { Button, Card, Field, Modal, inputCls, useConfirm } from '../components/ui'
 import type { Memo } from '../db/types'
+import { HelpButton } from '../components/Help'
 
 export function Memos() {
   const { semester, hideNames } = useApp()
@@ -44,6 +45,7 @@ export function Memos() {
     <div className="space-y-4">
       <div className="flex items-center gap-2 flex-wrap">
         <h1 className="text-xl font-bold flex-1">관찰 메모</h1>
+        <HelpButton topic="memo" />
         <Button onClick={() => setAdding('any')}>＋ 빠른 메모</Button>
       </div>
       <p className="text-sm text-gray-600">

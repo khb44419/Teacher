@@ -1,4 +1,4 @@
-import type { AppDB } from '../db/db'
+import { getDataModifiedAt, setDataModifiedAt, withoutModifiedMark, type AppDB } from '../db/db'
 
 export const BACKUP_APP = 'music-teacher-app'
 export const BACKUP_FORMAT = 1
@@ -9,6 +9,8 @@ export interface BackupData {
   app: typeof BACKUP_APP
   format: number
   exportedAt: number
+  /** 백업할 때 그 기기의 데이터가 마지막으로 바뀐 시각 */
+  dataModifiedAt?: number | null
   tables: Record<string, unknown[]>
 }
 export interface EncryptedBackup {
@@ -28,12 +30,12 @@ export async function exportAll(db: AppDB): Promise<BackupData> {
       tables[t.name] = t.name === 'kv' ? (rows as { key: string }[]).filter((r) => !LOCAL_ONLY_KEYS.includes(r.key)) : rows
     }
   })
-  return { app: BACKUP_APP, format: BACKUP_FORMAT, exportedAt: Date.now(), tables }
+  return { app: BACKUP_APP, format: BACKUP_FORMAT, exportedAt: Date.now(), dataModifiedAt: getDataModifiedAt(db.name), tables }
 }
 
 export function backupSummary(b: BackupData) {
   const n = (k: string) => b.tables[k]?.length ?? 0
-  return { exportedAt: b.exportedAt, semesters: n('semesters'), classes: n('classes'), students: n('students'), scores: n('scores'), memos: n('memos'), seteuks: n('seteuks') }
+  return { exportedAt: b.exportedAt, dataModifiedAt: b.dataModifiedAt ?? b.exportedAt, semesters: n('semesters'), classes: n('classes'), students: n('students'), scores: n('scores'), memos: n('memos'), seteuks: n('seteuks') }
 }
 
 /** 파일 내용 검사. 문제가 있으면 한국어 오류 메시지를 던짐 */
@@ -58,7 +60,7 @@ export function parseBackup(text: string, db: AppDB): BackupData | EncryptedBack
 
 /** 현재 데이터를 지우고 백업으로 바꿈 (이 기기 전용 설정은 유지). 하나의 트랜잭션이라 실패하면 원래대로. */
 export async function restoreAll(db: AppDB, b: BackupData) {
-  await db.transaction('rw', db.tables, async () => {
+  await withoutModifiedMark(() => db.transaction('rw', db.tables, async () => {
     const keep = await db.kv.bulkGet(LOCAL_ONLY_KEYS)
     for (const t of db.tables) {
       await t.clear()
@@ -67,7 +69,15 @@ export async function restoreAll(db: AppDB, b: BackupData) {
       if (filtered.length) await t.bulkAdd(filtered)
     }
     await db.kv.bulkPut(keep.filter((x): x is NonNullable<typeof x> => !!x))
-  })
+  }))
+  // 복원 후 이 기기 데이터의 '마지막 변경'은 백업 파일의 것과 같음
+  setDataModifiedAt(db.name, b.dataModifiedAt ?? b.exportedAt)
+}
+
+/** 복원하면 이 기기의 더 최근 변경이 사라지는지 */
+export function isOlderThanDevice(b: BackupData, deviceModifiedAt: number | null) {
+  const fileTime = b.dataModifiedAt ?? b.exportedAt
+  return deviceModifiedAt !== null && deviceModifiedAt > fileTime + 1000
 }
 
 // ── 비밀번호 암호화 (브라우저 내장 WebCrypto: PBKDF2 + AES-GCM) ──

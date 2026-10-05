@@ -11,7 +11,7 @@ import { Button, Modal } from './ui'
 type Scope = 'class' | 'grade' | 'level' | 'all'
 
 export function ExportDialog({ cls, onClose }: { cls: SchoolClass; onClose: () => void }) {
-  const { hideNames, semester } = useApp()
+  const { hideNames, semester, detailed } = useApp()
   const [scope, setScope] = useState<Scope>('class')
   const [cols, setCols] = useState<{ key: ExportColumn; on: boolean }[]>(defaultExportColumns.map((key) => ({ key, on: true })))
   const [includeNames, setIncludeNames] = useState(!hideNames)
@@ -65,7 +65,7 @@ export function ExportDialog({ cls, onClose }: { cls: SchoolClass; onClose: () =
             ))}
           </div>
         </div>
-        <div>
+        {detailed && <div>
           <div className="font-semibold mb-1">열 순서 (NEIS 입력 순서에 맞춰 조정)</div>
           <ul className="space-y-1">
             {cols.map((c, i) => (
@@ -78,7 +78,7 @@ export function ExportDialog({ cls, onClose }: { cls: SchoolClass; onClose: () =
               </li>
             ))}
           </ul>
-        </div>
+        </div>}
         <label className="flex items-center gap-2 min-h-11">
           <input type="checkbox" className="w-5 h-5" checked={includeNames} onChange={(e) => setIncludeNames(e.target.checked)} />
           이름 포함 (끄면 번호만 내보냄)

@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { db } from '../db/db'
+import { db, getKv, setKv } from '../db/db'
 import { createSemester } from '../db/services'
 import { BulkClassForm } from '../components/BulkClassForm'
 import { RosterImport } from '../components/RosterImport'
 import { Button, Card, Field, inputCls } from '../components/ui'
 import { useApp } from '../app/AppContext'
+import { enterPractice } from '../db/practice'
+import { HelpButton, SlideShow } from '../components/Help'
 
 const STEPS = ['학년도·학기', '학급 만들기', '학생 명단', '규정 확인', '시작하기']
 
@@ -19,6 +21,9 @@ export function Wizard() {
   const [term, setTerm] = useState<1 | 2>(now.getMonth() >= 2 && now.getMonth() <= 7 ? 1 : 2)
   const [semId, setSemId] = useState<number | undefined>(semester?.id)
   const [checked, setChecked] = useState(false)
+  const [intro, setIntro] = useState(false)
+  // 처음 한 번은 사용법 그림 설명을 자동으로 보여 줌
+  useEffect(() => { void getKv('seenIntro', false).then((seen) => { if (!seen) setIntro(true) }) }, [])
   const rules = useLiveQuery(() => db.rules.get('main'), [semId, step])
   const classCount = useLiveQuery(
     async () => (semId ? db.classes.where('semesterId').equals(semId).count() : 0),
@@ -35,7 +40,18 @@ export function Wizard() {
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-4">
-      <h1 className="text-2xl font-bold">🎵 처음 설정</h1>
+      {intro && <SlideShow topic="start" onClose={() => { setIntro(false); void setKv('seenIntro', true) }} />}
+      <div className="flex items-center gap-2">
+        <h1 className="text-2xl font-bold flex-1">🎵 처음 설정</h1>
+        <HelpButton topic="start" />
+      </div>
+      {step === 0 && (
+        <div className="bg-purple-50 border border-purple-300 rounded-xl p-4 space-y-2">
+          <p className="font-bold">🎓 처음이라 어떻게 쓰는지 궁금하세요?</p>
+          <p className="text-sm">가짜 학생과 점수가 들어 있는 <b>연습 모드</b>에서 먼저 눌러 볼 수 있습니다. 연습은 진짜 데이터와 완전히 따로입니다.</p>
+          <Button variant="secondary" onClick={enterPractice}>먼저 연습해 보기</Button>
+        </div>
+      )}
       <ol className="flex gap-1 text-xs">
         {STEPS.map((s, i) => (
           <li key={s} className={`flex-1 text-center py-2 rounded ${i === step ? 'bg-brand-600 text-white font-bold' : i < step ? 'bg-brand-100' : 'bg-gray-200'}`}>

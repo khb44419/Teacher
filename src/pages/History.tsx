@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
 import { Card, inputCls } from '../components/ui'
+import { HelpButton } from '../components/Help'
 
 export function History() {
   const [filter, setFilter] = useState('')
@@ -15,6 +16,7 @@ export function History() {
       <div className="flex items-center gap-2">
         <Link to="/plans" className="text-brand-700 min-h-11 leading-[44px]">← 평가 계획</Link>
         <h1 className="text-xl font-bold flex-1">변경 이력</h1>
+        <HelpButton topic="plans" />
       </div>
       <select className={inputCls} value={filter} onChange={(e) => setFilter(e.target.value)}>
         <option value="">전체</option>

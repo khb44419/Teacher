@@ -4,6 +4,7 @@ import { loadImportClasses } from '../db/reportData'
 import { importScores } from '../db/scoreService'
 import { parseScoreSheet, type ImportEntry, type ImportError } from '../lib/report'
 import { Button, Modal, useConfirm } from './ui'
+import { FilePick } from './FilePick'
 
 export function ImportScoresDialog({ semesterId, onClose }: { semesterId: number; onClose: () => void }) {
   const [entries, setEntries] = useState<ImportEntry[]>([])
@@ -62,7 +63,7 @@ export function ImportScoresDialog({ semesterId, onClose }: { semesterId: number
           <li>&quot;번호&quot; 열이 꼭 필요하고, 점수 열 제목은 평가 항목 이름과 같아야 합니다.</li>
           <li>수준형은 수준 이름(상/중/하) 또는 환산 점수. 빈칸은 건너뜁니다.</li>
         </ul>
-        <input type="file" accept=".xlsx,.xls,.csv" onChange={(e) => { const f = e.target.files?.[0]; if (f) void read(f); e.target.value = '' }} />
+        <FilePick label="📂 엑셀 파일 고르기" accept=".xlsx,.xls,.csv" onFile={(f) => void read(f)} />
         {loaded && (
           <div className="space-y-2">
             <p className="font-semibold">가져올 점수 {entries.length + (includeSpecial ? special.length : 0)}건 · 덮어쓰기 {overwrite + (includeSpecial ? special.length : 0)}건 · <span className={errors.length ? 'text-red-600' : ''}>오류 {errors.length}건</span></p>

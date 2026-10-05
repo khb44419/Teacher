@@ -29,3 +29,23 @@ describe('명단 파싱', () => {
     expect(r[2].error).toMatch(/중복/)
   })
 })
+
+describe('NEIS 명렬표 형식', () => {
+  it('제목 줄 아래 머리글, 성별 등 추가 열, 빈 줄은 무시', () => {
+    const rows = [
+      ['2026학년도 1학년 3반 명렬표', '', '', '', ''],
+      ['', '', '', '', ''],
+      ['학년', '반', '번호', '성명', '성별'],
+      ['1', '3', '1', '김가나', '여'],
+      ['', '', '', '', ''],
+      ['1', '3', '2', '이다라', '남'],
+    ]
+    const r = parseRoster(rows, '중')
+    expect(r.map((x) => [x.no, x.name, x.error])).toEqual([[1, '김가나', undefined], [2, '이다라', undefined]])
+    expect(r[0].line).toBe(4)
+  })
+  it('출석번호·학생명 머리글', () => {
+    const r = parseRoster(parseTable('학년,반,출석번호,학생명\n2,1,5,홍길동'), '고')
+    expect(r[0]).toMatchObject({ grade: 2, classNo: 1, no: 5, name: '홍길동' })
+  })
+})

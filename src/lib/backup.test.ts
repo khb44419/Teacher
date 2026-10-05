@@ -49,3 +49,13 @@ describe('백업과 복원', () => {
     expect(await checkPin('0000', h)).toBe(false)
   })
 })
+
+import { isOlderThanDevice } from './backup'
+describe('어느 기기가 최신인지', () => {
+  const b = { app: 'music-teacher-app' as const, format: 1, exportedAt: 5000, dataModifiedAt: 3000, tables: {} }
+  it('기기 데이터가 백업보다 나중에 바뀌었으면 경고', () => {
+    expect(isOlderThanDevice(b, 10000)).toBe(true)
+    expect(isOlderThanDevice(b, 3500)).toBe(false) // 1초 이내 차이는 같은 것으로
+    expect(isOlderThanDevice(b, null)).toBe(false)
+  })
+})

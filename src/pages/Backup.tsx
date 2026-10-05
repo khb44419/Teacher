@@ -1,30 +1,58 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { db, setKv } from '../db/db'
+import { db, getDataModifiedAt, setKv } from '../db/db'
+import { useApp } from '../app/AppContext'
+import { HelpButton } from '../components/Help'
 import {
-  backupSummary, checkPin, decryptBackup, encryptBackup, exportAll, hashPin, parseBackup, restoreAll,
+  backupSummary, checkPin, decryptBackup, encryptBackup, exportAll, hashPin, isOlderThanDevice, parseBackup, restoreAll,
   type BackupData, type EncryptedBackup,
 } from '../lib/backup'
 import { downloadBlob, todayStamp } from '../lib/download'
 import { Button, Card, Field, Modal, inputCls, useConfirm } from '../components/ui'
 
-const fmt = (t: number) => new Date(t).toLocaleString('ko-KR')
+const fmt = (t: number) => new Date(t).toLocaleString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short', hour: 'numeric', minute: '2-digit' })
 
-export async function makeBackupFile(password?: string) {
+async function buildBackup(password?: string) {
   const data = await exportAll(db)
   const out = password ? await encryptBackup(data, password) : data
-  downloadBlob(JSON.stringify(out), `음악평가_백업_${todayStamp()}${password ? '_암호' : ''}.json`, 'application/json')
+  const name = `음악평가_백업_${todayStamp()}${password ? '_암호' : ''}.json`
+  return { name, text: JSON.stringify(out) }
+}
+
+export async function makeBackupFile(password?: string) {
+  const { name, text } = await buildBackup(password)
+  downloadBlob(text, name, 'application/json')
   await setKv('lastBackupAt', Date.now())
+}
+
+/** 휴대폰에서는 공유 창(카카오톡 '나와의 채팅', 구글 드라이브 등)으로, 안 되면 파일 내려받기 */
+async function sendToOtherDevice(password?: string): Promise<'shared' | 'downloaded' | 'cancelled'> {
+  const { name, text } = await buildBackup(password)
+  const file = new File([text], name, { type: 'application/json' })
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: '음악평가 백업' })
+      await setKv('lastBackupAt', Date.now())
+      return 'shared'
+    } catch (e) {
+      if ((e as Error).name === 'AbortError') return 'cancelled'
+    }
+  }
+  downloadBlob(text, name, 'application/json')
+  await setKv('lastBackupAt', Date.now())
+  return 'downloaded'
 }
 
 export function Backup() {
   const nav = useNavigate()
+  const { practice } = useApp()
   const { ask, dialog } = useConfirm()
   const last = useLiveQuery(async () => ((await db.kv.get('lastBackupAt'))?.value as number | undefined) ?? null, [])
   const pin = useLiveQuery(async () => ((await db.kv.get('pinHash'))?.value as { salt: string; hash: string } | undefined) ?? null, [])
+  const deviceModified = getDataModifiedAt(db.name)
   const [persisted, setPersisted] = useState<boolean | null>(null)
-  const [usePw, setUsePw] = useState(false)
+  const [usePw, setUsePw] = useState(true)
   const [pw1, setPw1] = useState('')
   const [pw2, setPw2] = useState('')
   const [msg, setMsg] = useState('')
@@ -35,10 +63,18 @@ export function Backup() {
 
   useEffect(() => { void navigator.storage?.persisted?.().then(setPersisted).catch(() => setPersisted(null)) }, [])
 
-  const doBackup = async () => {
-    if (usePw && (pw1.length < 4 || pw1 !== pw2)) { setMsg('비밀번호는 4자 이상, 두 칸이 같아야 합니다'); return }
-    await makeBackupFile(usePw ? pw1 : undefined)
-    setMsg('✅ 백업 파일을 내려받았습니다. 안전한 곳(개인 USB, 개인 클라우드 등)에 보관하세요.')
+  const pwOk = () => {
+    if (!usePw) return true
+    if (pw1.length < 4 || pw1 !== pw2) { setMsg('비밀번호는 4자 이상, 두 칸이 같아야 합니다'); return false }
+    return true
+  }
+  const doSend = async () => {
+    if (!pwOk()) return
+    const r = await sendToOtherDevice(usePw ? pw1 : undefined)
+    if (r === 'cancelled') return setMsg('보내기를 취소했습니다.')
+    setMsg(r === 'shared'
+      ? '✅ 보냈습니다. 받는 기기에서 그 파일을 저장한 뒤 아래 "② 받기"에서 고르세요.'
+      : '✅ 백업 파일을 내려받았습니다(다운로드 폴더). 이 파일을 카카오톡 "나와의 채팅"이나 구글 드라이브로 다른 기기에 보내세요.')
     setPw1(''); setPw2('')
   }
 
@@ -58,64 +94,93 @@ export function Backup() {
   const doRestore = () => {
     if (!ready) return
     const s = backupSummary(ready)
-    ask(`⚠ 지금 이 기기의 데이터가 모두 지워지고 백업 파일(${fmt(s.exportedAt)})의 내용으로 대체됩니다.\n되돌릴 수 없으니, 필요하면 먼저 "지금 데이터 백업"을 하세요.`, async () => {
+    const older = isOlderThanDevice(ready, deviceModified)
+    ask(`${older ? '🚨 이 기기의 데이터가 받은 파일보다 더 최근에 바뀌었습니다!\n받으면 이 기기에서 최근에 입력한 내용이 사라집니다.\n\n' : ''}이 기기의 데이터가 모두 지워지고, 받은 파일(${fmt(s.dataModifiedAt)} 기준)의 내용으로 바뀝니다.`, async () => {
       try {
         await restoreAll(db, ready)
         setReady(null)
         nav('/')
-      } catch (e) { setErr(`복원 실패 (기존 데이터는 그대로입니다): ${(e as Error).message}`) }
-    }, '복원하기')
+      } catch (e) { setErr(`받기 실패 (기존 데이터는 그대로입니다): ${(e as Error).message}`) }
+    }, older ? '그래도 받기' : '받기')
+  }
+
+  if (practice) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-xl font-bold">백업·기기 옮기기</h1>
+        <Card>🎓 연습 모드에서는 백업과 기기 옮기기를 쓸 수 없습니다. 연습을 끝낸 뒤 이용하세요.</Card>
+        <PinCard pin={pin ?? null} />
+      </div>
+    )
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Link to="/settings" className="text-brand-700 min-h-11 leading-[44px]">← 설정</Link>
-        <h1 className="text-xl font-bold flex-1">백업·복원·보안</h1>
+        <h1 className="text-xl font-bold flex-1">백업·기기 옮기기</h1>
+        <HelpButton topic="backup" />
       </div>
 
-      <Card className="space-y-1 text-sm">
-        <p>🔒 모든 데이터는 <b>이 기기의 이 브라우저 안에만</b> 저장됩니다. 브라우저 기록 삭제, 기기 고장·분실 시 사라질 수 있습니다.</p>
-        <p>마지막 백업: <b>{last ? fmt(last) : '없음'}</b></p>
-        <p>브라우저의 데이터 보존 허용: {persisted === null ? '확인 불가' : persisted ? '✔ 허용됨' : '✖ 허용 안 됨 (홈 화면에 설치하면 허용될 수 있습니다)'}</p>
+      <Card className="space-y-1">
+        <p>🔒 데이터는 <b>이 기기 안에만</b> 있습니다. 노트북과 휴대폰은 서로 자동으로 맞춰지지 않아요.</p>
+        <p>이 기기 데이터 마지막 변경: <b>{deviceModified ? fmt(deviceModified) : '기록 없음'}</b></p>
+        <p>마지막으로 보낸(백업한) 때: <b>{last ? fmt(last) : '없음'}</b></p>
+        {persisted === false && <p className="text-sm text-gray-600">💡 홈 화면에 앱을 설치해 두면 브라우저가 데이터를 더 안전하게 보관합니다.</p>}
+      </Card>
+
+      <Card className="bg-blue-50 border-blue-200 space-y-1 text-sm">
+        <p className="font-bold text-base">📱 노트북 ↔ 휴대폰 옮기는 순서</p>
+        <p>1. 방금까지 쓴 기기에서 <b>① 보내기</b></p>
+        <p>2. 카카오톡 <b>&quot;나와의 채팅&quot;</b> 또는 <b>구글 드라이브</b>로 파일 보내기</p>
+        <p>3. 다른 기기에서 그 파일을 저장(다운로드)</p>
+        <p>4. 다른 기기의 이 화면에서 <b>② 받기</b> → 파일 고르기</p>
+        <p className="text-gray-700">⚠ 한 번에 한 기기에서만 입력하세요. 기기를 바꿀 때마다 보내기→받기를 하면 됩니다.</p>
       </Card>
 
       <Card className="space-y-3">
-        <h2 className="font-bold text-lg">💾 백업 파일 만들기</h2>
-        <p className="text-sm text-gray-600">규정 설정, 평가 계획, 점수, 메모, 세특, 문구 템플릿까지 전부 파일 하나(.json)로 저장합니다.</p>
+        <h2 className="font-bold text-lg">① 보내기 (백업)</h2>
         <label className="flex items-center gap-2 min-h-11">
           <input type="checkbox" className="w-5 h-5" checked={usePw} onChange={(e) => setUsePw(e.target.checked)} />
-          비밀번호로 암호화 (추천: 파일을 메신저·이메일로 옮길 때)
+          비밀번호 걸기 (추천: 카카오톡·메일로 보낼 때)
         </label>
         {usePw && (
           <div className="grid grid-cols-2 gap-2">
             <Field label="비밀번호"><input type="password" className={inputCls} value={pw1} onChange={(e) => setPw1(e.target.value)} autoComplete="new-password" /></Field>
             <Field label="비밀번호 확인"><input type="password" className={inputCls} value={pw2} onChange={(e) => setPw2(e.target.value)} autoComplete="new-password" /></Field>
-            <p className="col-span-2 text-xs text-orange-700">⚠ 비밀번호를 잊으면 이 백업은 아무도 열 수 없습니다.</p>
+            <p className="col-span-2 text-xs text-orange-700">⚠ 받을 때 이 비밀번호가 필요합니다. 잊으면 아무도 열 수 없어요.</p>
           </div>
         )}
-        <Button onClick={() => void doBackup()}>백업 파일 내려받기</Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button className="min-h-14 text-lg" onClick={() => void doSend()}>📤 다른 기기로 보내기</Button>
+          <Button variant="secondary" onClick={() => { if (pwOk()) void makeBackupFile(usePw ? pw1 : undefined).then(() => setMsg('✅ 백업 파일을 내려받았습니다. 개인 USB·개인 클라우드 등 안전한 곳에 보관하세요.')) }}>💾 이 기기에 백업 파일 저장</Button>
+        </div>
         {msg && <p className="text-sm">{msg}</p>}
       </Card>
 
       <Card className="space-y-3">
-        <h2 className="font-bold text-lg">♻️ 백업에서 복원</h2>
-        <p className="text-sm text-gray-600">다른 기기(학교 PC ↔ 태블릿)로 옮길 때: 원래 기기에서 백업 파일을 만들고, 새 기기에서 이 앱을 연 뒤 여기서 그 파일을 고르세요.</p>
-        <input type="file" accept=".json,application/json" onChange={(e) => { const f = e.target.files?.[0]; if (f) void pick(f); e.target.value = '' }} />
+        <h2 className="font-bold text-lg">② 받기 (복원)</h2>
+        <p className="text-sm text-gray-600">다른 기기에서 보낸 파일(음악평가_백업_….json)을 고르세요.</p>
+        <label className="inline-flex items-center justify-center min-h-14 px-5 rounded-lg bg-white border-2 border-brand-600 text-brand-700 font-bold cursor-pointer">
+          📥 받은 파일 고르기
+          <input type="file" className="sr-only" accept=".json,application/json" onChange={(e) => { const f = e.target.files?.[0]; if (f) void pick(f); e.target.value = '' }} />
+        </label>
         {pending && (
           <div className="flex gap-2 items-end">
-            <Field label="이 백업의 비밀번호"><input type="password" className={inputCls} value={openPw} onChange={(e) => setOpenPw(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && void unlock()} /></Field>
+            <Field label="보낼 때 정한 비밀번호"><input type="password" className={inputCls} value={openPw} onChange={(e) => setOpenPw(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && void unlock()} /></Field>
             <Button onClick={() => void unlock()}>열기</Button>
           </div>
         )}
         {ready && (() => {
           const s = backupSummary(ready)
+          const older = isOlderThanDevice(ready, deviceModified)
           return (
-            <div className="bg-gray-50 rounded-lg p-3 text-sm space-y-2">
-              <p>백업 시각 <b>{fmt(s.exportedAt)}</b> · 학기 {s.semesters} · 학급 {s.classes} · 학생 {s.students} · 점수 {s.scores} · 메모 {s.memos} · 세특 {s.seteuks}</p>
+            <div className={`rounded-lg p-3 text-sm space-y-2 ${older ? 'bg-red-50 border border-red-300' : 'bg-gray-50'}`}>
+              <p>받은 파일: <b>{fmt(s.dataModifiedAt)}</b> 기준 데이터 · 학생 {s.students}명 · 점수 {s.scores}건 · 메모 {s.memos}건 · 세특 {s.seteuks}건</p>
+              {older && <p className="font-bold text-red-700">🚨 이 기기 데이터({deviceModified ? fmt(deviceModified) : ''})가 받은 파일보다 더 최근입니다. 받으면 최근 입력이 사라져요. 파일이 맞는지 확인하세요.</p>}
               <div className="flex gap-2 flex-wrap">
-                <Button variant="secondary" onClick={() => void makeBackupFile()}>먼저 지금 데이터 백업</Button>
-                <Button variant="danger" onClick={doRestore}>이 백업으로 복원</Button>
+                <Button variant="secondary" onClick={() => void makeBackupFile()}>먼저 이 기기 데이터 백업</Button>
+                <Button variant="danger" onClick={doRestore}>이 파일로 바꾸기</Button>
               </div>
             </div>
           )

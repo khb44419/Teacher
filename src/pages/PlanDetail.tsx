@@ -9,11 +9,12 @@ import { Button, Card, Modal, useConfirm } from '../components/ui'
 import { ItemEditor } from '../components/ItemEditor'
 import { LibraryDialog } from '../components/LibraryDialog'
 import type { AssessmentItem } from '../db/types'
+import { HelpButton } from '../components/Help'
 
 export function PlanDetail() {
   const id = Number(useParams().id)
   const nav = useNavigate()
-  const { semester } = useApp()
+  const { semester, detailed } = useApp()
   const { ask, dialog } = useConfirm()
   const plan = useLiveQuery(() => db.plans.get(id), [id])
   const planSem = useLiveQuery(() => (plan ? db.semesters.get(plan.semesterId) : undefined), [plan?.semesterId])
@@ -48,6 +49,7 @@ export function PlanDetail() {
       <div className="flex items-center gap-2">
         <Link to="/plans" className="text-brand-700 min-h-11 leading-[44px]">← 평가 계획</Link>
         <h1 className="text-xl font-bold flex-1">{planLabel(plan)}</h1>
+        <HelpButton topic="plans" />
       </div>
       <p className="text-sm text-gray-600">
         {plan.level === '중' ? '중학교' : '고등학교'} {plan.grade}학년 {classCount}개 학급에 자동 적용됩니다.
@@ -93,7 +95,7 @@ export function PlanDetail() {
                   <Button variant="secondary" onClick={() => setEditing({ item: it })}>{readOnly ? '보기' : '수정'}</Button>
                   {!readOnly && (
                     <>
-                      <Button variant="ghost" title="보관함에 저장" onClick={() => void saveToLibrary(it).then(() => setErr(''))}>🗂 보관</Button>
+                      {detailed && <Button variant="ghost" title="보관함에 저장" onClick={() => void saveToLibrary(it).then(() => setErr(''))}>🗂 보관</Button>}
                       <Button variant="ghost" onClick={() => setDelTarget(it)}>🗑</Button>
                     </>
                   )}
@@ -108,7 +110,7 @@ export function PlanDetail() {
       {!readOnly && (
         <div className="flex gap-2 flex-wrap">
           <Button onClick={() => setEditing({})}>＋ 새 항목</Button>
-          <Button variant="secondary" onClick={() => setLib(true)}>🗂 보관함에서 추가</Button>
+          {detailed && <Button variant="secondary" onClick={() => setLib(true)}>🗂 보관함에서 추가</Button>}
           <Button variant="danger" className="ml-auto" onClick={async () => {
             const n = (await Promise.all(items.map((i) => db.scores.where('itemId').equals(i.id!).count()))).reduce((a, b) => a + b, 0)
             ask(`"${planLabel(plan)}" 계획과 항목 ${items.length}개를 삭제합니다.` + (n ? `\n⚠ 입력된 점수 ${n}건도 함께 삭제됩니다.` : '') + '\n되돌릴 수 없습니다.',

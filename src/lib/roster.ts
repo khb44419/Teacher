@@ -39,9 +39,10 @@ const headerMap: [Col, RegExp][] = [
   ['level', /^(학교급|학교)$/],
   ['grade', /^학년$/],
   ['classNo', /^(반|학급)$/],
-  ['no', /^(번호|번)$/],
-  ['name', /^(이름|성명)$/],
+  ['no', /^(번호|번|출석번호)$/],
+  ['name', /^(이름|성명|학생명|학생이름)$/],
 ]
+const colOf = (c: string) => headerMap.find(([, re]) => re.test(c.replace(/\s/g, '')))?.[0]
 
 /**
  * 표를 학생 행으로 변환. 머리글 행이 있으면 열 이름으로, 없으면 열 개수로 판단:
@@ -51,11 +52,11 @@ export function parseRoster(rows: string[][], defaultLevel: SchoolLevel): Roster
   if (rows.length === 0) return []
   let start = 0
   let cols: Col[] | null = null
-  const first = rows[0]
-  const mapped = first.map((c) => headerMap.find(([, re]) => re.test(c.replace(/\s/g, '')))?.[0])
-  if (mapped.some(Boolean)) {
-    cols = mapped.map((m) => m ?? ('' as Col))
-    start = 1
+  // NEIS 명렬표처럼 위에 제목 줄이 있을 수 있으므로, 앞 15줄 안에서 '번호'가 있는 머리글 줄을 찾음
+  const hIdx = rows.slice(0, 15).findIndex((row) => row.some((c) => colOf(c) === 'no'))
+  if (hIdx >= 0) {
+    cols = rows[hIdx].map((c) => colOf(c) ?? ('' as Col)) // 성별·생년월일 등 다른 열은 무시
+    start = hIdx + 1
   }
   const out: RosterRow[] = []
   const seen = new Set<string>()
@@ -67,6 +68,8 @@ export function parseRoster(rows: string[][], defaultLevel: SchoolLevel): Roster
       const idx = c.indexOf(k)
       return idx >= 0 ? row[idx] : undefined
     }
+    // 빈 줄·합계 줄 등 학년·반·번호가 모두 비어 있으면 조용히 건너뜀
+    if (['grade', 'classNo', 'no'].every((k) => !String(get(k as Col) ?? '').trim()) && !get('name')?.trim()) continue
     const level = get('level') !== undefined ? toLevel(get('level')) : defaultLevel
     const grade = toInt(get('grade'))
     const classNo = toInt(get('classNo'))

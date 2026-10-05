@@ -3,6 +3,7 @@ import { importRoster } from '../db/services'
 import type { SchoolLevel } from '../db/types'
 import { parseRoster, parseTable, type RosterRow } from '../lib/roster'
 import { Button, Field, inputCls } from './ui'
+import { FilePick } from './FilePick'
 
 async function fileToRows(file: File): Promise<string[][]> {
   const XLSX = await import('xlsx') // 필요할 때만 불러옴 (앱 시작 속도)
@@ -52,19 +53,7 @@ export function RosterImport({ semesterId, onDone }: { semesterId: number; onDon
           setRows(parseTable(e.target.value))
         }}
       />
-      <input
-        type="file"
-        accept=".xlsx,.xls,.csv"
-        className="block text-sm"
-        onChange={async (e) => {
-          const f = e.target.files?.[0]
-          if (f) {
-            setRows(await fileToRows(f))
-            setText('')
-          }
-          e.target.value = ''
-        }}
-      />
+      <FilePick label="📂 엑셀·CSV 파일 고르기" accept=".xlsx,.xls,.csv" onFile={async (f) => { setRows(await fileToRows(f)); setText('') }} />
       {parsed.length > 0 && (
         <div className="space-y-2">
           <p className="font-semibold">

@@ -5,6 +5,7 @@ import { deleteClass, deleteStudent } from '../db/services'
 import { useApp } from '../app/AppContext'
 import { Button, Card, inputCls, useConfirm } from '../components/ui'
 import type { Student, StudentStatus } from '../db/types'
+import { HelpButton } from '../components/Help'
 
 export function ClassDetail() {
   const id = Number(useParams().id)
@@ -27,6 +28,7 @@ export function ClassDetail() {
         <h1 className="text-xl font-bold flex-1">
           {cls.level === '중' ? '중' : '고'}{cls.grade}-{cls.classNo} ({cls.subject}) · {students.length}명
         </h1>
+        <HelpButton topic="classes" />
       </div>
       <Card className="p-0 overflow-hidden">
         <table className="w-full">

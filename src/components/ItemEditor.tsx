@@ -33,6 +33,7 @@ export function ItemEditor({ planId, item, initial, readOnly, onClose }: Props) 
   const [end, setEnd] = useState(src?.endDate ?? '')
   const [enabled, setEnabled] = useState(src?.enabled ?? true)
   const [errors, setErrors] = useState<string[]>([])
+  const [moreOpen, setMoreOpen] = useState(false)
   const [confirm, setConfirm] = useState<null | { n: number; aff: number; maxChanged: boolean; weightChanged: boolean }>(null)
   const [rescale, setRescale] = useState<boolean | null>(null)
 
@@ -68,6 +69,7 @@ export function ItemEditor({ planId, item, initial, readOnly, onClose }: Props) 
       }
     }
     setErrors(errs)
+    if (errs.some((e) => /최저점|기간/.test(e))) setMoreOpen(true)
     if (errs.length) return
     if (item?.id) {
       const n = await itemScoreCount(item.id)
@@ -84,29 +86,20 @@ export function ItemEditor({ planId, item, initial, readOnly, onClose }: Props) 
   return (
     <Modal title={item ? '평가 항목 수정' : '새 평가 항목'} onClose={onClose}>
       <fieldset disabled={readOnly} className="space-y-3">
-        <Field label="항목 이름"><input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="예: 리코더 연주" /></Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="평가 유형">
-            <select className={inputCls} value={type} onChange={(e) => setType(e.target.value)}>
-              {types.map((t) => <option key={t}>{t}</option>)}
-            </select>
-          </Field>
-          <Field label="채점 방식">
-            <select className={inputCls} value={scoring} onChange={(e) => {
-              const v = e.target.value as 'score' | 'level'
-              setScoring(v)
-              if (v === 'level' && levels.length === 0)
-                setLevels(defaultLevels(num(max) || 20).map((l) => ({ label: l.label, score: String(l.score) })))
-            }}>
-              <option value="score">점수형</option>
-              <option value="level">수준형 (상/중/하 등)</option>
-            </select>
-          </Field>
+        <Field label="① 항목 이름"><input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="예: 리코더 연주" /></Field>
+        <div>
+          <span className="block text-sm font-semibold mb-1">② 어떻게 매기나요?</span>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant={scoring === 'score' ? 'primary' : 'secondary'} className="min-h-14" onClick={() => setScoring('score')}>🔢 점수로</Button>
+            <Button variant={scoring === 'level' ? 'primary' : 'secondary'} className="min-h-14" onClick={() => {
+              setScoring('level')
+              if (levels.length === 0) setLevels(defaultLevels(num(max) || 20).map((l) => ({ label: l.label, score: String(l.score) })))
+            }}>🅰️ 상·중·하로</Button>
+          </div>
         </div>
-        <div className="grid grid-cols-3 gap-3">
-          <Field label="만점"><input className={inputCls} type="number" inputMode="decimal" value={max} onChange={(e) => setMax(e.target.value)} /></Field>
-          <Field label="기본 점수(최저점)"><input className={inputCls} type="number" inputMode="decimal" value={min} onChange={(e) => setMin(e.target.value)} /></Field>
-          <Field label="반영 비율(%)"><input className={inputCls} type="number" inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} /></Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="③ 만점"><input className={inputCls} type="number" inputMode="decimal" value={max} onChange={(e) => setMax(e.target.value)} /></Field>
+          <Field label="④ 반영 비율(%)" hint="성적에서 차지하는 비중"><input className={inputCls} type="number" inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} /></Field>
         </div>
         {scoring === 'level' && (
           <div className="border rounded-lg p-3 space-y-2">
@@ -121,15 +114,28 @@ export function ItemEditor({ planId, item, initial, readOnly, onClose }: Props) 
             <Button variant="secondary" onClick={() => setLevels([...levels, { label: '', score: '' }])}>＋ 수준 추가</Button>
           </div>
         )}
-        <Field label="평가 기준 (루브릭)"><textarea className={`${inputCls} min-h-24 py-2`} value={rubric} onChange={(e) => setRubric(e.target.value)} placeholder="상: …&#10;중: …&#10;하: …" /></Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="평가 예정 시작일"><input className={inputCls} type="date" value={start} onChange={(e) => setStart(e.target.value)} /></Field>
-          <Field label="평가 예정 종료일"><input className={inputCls} type="date" value={end} onChange={(e) => setEnd(e.target.value)} /></Field>
-        </div>
-        <label className="flex items-center gap-2 min-h-11">
-          <input type="checkbox" className="w-5 h-5" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
-          사용 (끄면 점수 입력·합산에서 숨겨집니다. 입력된 점수는 남습니다)
-        </label>
+        <details open={moreOpen} onToggle={(e) => setMoreOpen((e.target as HTMLDetailsElement).open)} className="border rounded-lg">
+          <summary className="cursor-pointer min-h-12 py-3 px-3 font-semibold text-brand-700">더 보기 (평가 유형, 기본 점수, 평가 기준, 평가 기간, 사용 여부)</summary>
+          <div className="space-y-3 p-3 pt-0">
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="평가 유형">
+                <select className={inputCls} value={type} onChange={(e) => setType(e.target.value)}>
+                  {types.map((t) => <option key={t}>{t}</option>)}
+                </select>
+              </Field>
+              <Field label="기본 점수(최저점)" hint="참여만 해도 주는 최저 점수"><input className={inputCls} type="number" inputMode="decimal" value={min} onChange={(e) => setMin(e.target.value)} /></Field>
+            </div>
+            <Field label="평가 기준 (루브릭)"><textarea className={`${inputCls} min-h-24 py-2`} value={rubric} onChange={(e) => setRubric(e.target.value)} placeholder="상: …&#10;중: …&#10;하: …" /></Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="평가 예정 시작일"><input className={inputCls} type="date" value={start} onChange={(e) => setStart(e.target.value)} /></Field>
+              <Field label="평가 예정 종료일"><input className={inputCls} type="date" value={end} onChange={(e) => setEnd(e.target.value)} /></Field>
+            </div>
+            <label className="flex items-center gap-2 min-h-11">
+              <input type="checkbox" className="w-5 h-5" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+              사용 (끄면 점수 입력·합산에서 숨겨집니다. 입력된 점수는 남습니다)
+            </label>
+          </div>
+        </details>
       </fieldset>
 
       {errors.length > 0 && (

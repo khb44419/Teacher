@@ -14,6 +14,7 @@ import { ScoreEntry } from './pages/ScoreEntry'
 import { Report } from './pages/Report'
 import { Memos } from './pages/Memos'
 import { Backup } from './pages/Backup'
+import { HelpHub } from './pages/HelpHub'
 import { LockGate } from './components/LockScreen'
 import { UpdatePrompt } from './components/UpdatePrompt'
 import { Seteuk } from './pages/Seteuk'
@@ -45,6 +46,7 @@ function Routed() {
         <Route path="plans/history" element={<History />} />
         <Route path="plans/:id" element={<PlanDetail />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="help" element={<HelpHub />} />
         <Route path="settings/backup" element={<Backup />} />
         <Route path="settings/rules" element={<Rules />} />
         <Route path="settings/classes" element={<Classes />} />

@@ -6,12 +6,14 @@ import { useApp } from '../app/AppContext'
 import { classLabel, classSort } from '../lib/classLabel'
 import { planLabel } from '../lib/plans'
 import { clearScore, enterAbsence, enterScore, markReassess, reassessImpossible, undo, type UndoEntry } from '../db/scoreService'
+import { undoStore, useUndoEntries } from '../lib/undoStore'
 import { ScoreCard, scoreText } from '../components/ScoreCard'
 import { AbsenceDialog } from '../components/AbsenceDialog'
 import { QuickMemo } from '../components/QuickMemo'
 import { studentLabel } from '../components/StudentName'
 import { Button, Card, Modal } from '../components/ui'
 import type { AssessmentItem, SchoolClass, Score, Student } from '../db/types'
+import { HelpButton } from '../components/Help'
 
 /** 완료 = 점수·수준 입력 또는 결시 처리됨 (재평가 대기는 미완료) */
 export const isDone = (s?: Score) => !!s && s.status !== 'reassess'
@@ -46,7 +48,10 @@ function ClassPicker({ semesterId, onPick }: { semesterId?: number; onPick: (id:
   })
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">점수 입력 · 학급 선택</h1>
+      <div className="flex items-center gap-2">
+        <h1 className="text-xl font-bold flex-1">점수 입력 · 학급 선택</h1>
+        <HelpButton topic="score" />
+      </div>
       {classes?.length === 0 && <Card>학급이 없습니다. 설정 → 학급·학생 관리에서 먼저 만드세요.</Card>}
       {[...groups].map(([name, list]) => (
         <Card key={name}>
@@ -81,6 +86,7 @@ function ItemPicker({ cls, onPick, onBack }: { cls: SchoolClass; onPick: (id: nu
       <div className="flex items-center gap-2">
         <Button variant="ghost" onClick={onBack}>← 학급</Button>
         <h1 className="text-xl font-bold flex-1">{classLabel(cls)} · 평가 항목 선택</h1>
+        <HelpButton topic="score" />
       </div>
       {data && !data.plan && (
         <Card>
@@ -120,7 +126,7 @@ function Entry({ cls, item, mode, initialFilter, setMode, onBack }: { cls: Schoo
     return m
   }, [cls.id, item.id])
   const [idx, setIdx] = useState(0)
-  const [stack, setStack] = useState<UndoEntry[]>([])
+  useUndoEntries() // 되돌리기 기록이 바뀌면 다시 그림
   const [dialog, setDialog] = useState<Dialog>(null)
   const [filter, setFilter] = useState<'all' | 'missing' | 'reassess'>(initialFilter)
   const [msg, setMsg] = useState('')
@@ -128,6 +134,7 @@ function Entry({ cls, item, mode, initialFilter, setMode, onBack }: { cls: Schoo
   if (!students || !scores || !rules || !plan) return null
 
   const readOnly = sem?.status === 'closed'
+  const classIds = new Set(students.map((s) => s.id!))
   const done = active.filter((s) => isDone(scores.get(s.id!))).length
   const reassessCount = active.filter((s) => scores.get(s.id!)?.status === 'reassess').length
   const cur = active[Math.min(idx, active.length - 1)]
@@ -135,7 +142,7 @@ function Entry({ cls, item, mode, initialFilter, setMode, onBack }: { cls: Schoo
   const act = async (fn: () => Promise<UndoEntry>, advance: boolean) => {
     try {
       const u = await fn()
-      setStack((s) => [...s.slice(-49), u]) // 최근 50개까지 되돌리기
+      undoStore.push(u) // 다른 화면에 다녀와도 되돌리기 가능
       setMsg('')
       if (advance && mode === 'seq') {
         if (idx < active.length - 1) setIdx(idx + 1)
@@ -145,17 +152,18 @@ function Entry({ cls, item, mode, initialFilter, setMode, onBack }: { cls: Schoo
     } catch (e) { setMsg((e as Error).message) }
   }
   const doUndo = async () => {
-    const u = stack[stack.length - 1]
+    const u = undoStore.last(item.id!, classIds)
     if (!u) return
     try {
       await undo(u)
-      setStack(stack.slice(0, -1))
+      undoStore.remove(u)
       const i = active.findIndex((s) => s.id === u.studentId)
       if (i >= 0 && mode === 'seq') setIdx(i)
       setMsg('')
     } catch (e) { setMsg((e as Error).message) }
   }
-  const lastUndoStudent = stack.length ? students.find((s) => s.id === stack[stack.length - 1].studentId) : undefined
+  const lastUndo = undoStore.last(item.id!, classIds)
+  const lastUndoStudent = lastUndo ? students.find((s) => s.id === lastUndo.studentId) : undefined
   const nextMissing = () => {
     const after = active.findIndex((s, i) => i > idx && !isDone(scores.get(s.id!)))
     const any = after >= 0 ? after : active.findIndex((s) => !isDone(scores.get(s.id!)))
@@ -189,6 +197,7 @@ function Entry({ cls, item, mode, initialFilter, setMode, onBack }: { cls: Schoo
       <div className="flex items-center gap-2 flex-wrap">
         <Button variant="ghost" onClick={onBack}>← 항목</Button>
         <h1 className="text-lg font-bold flex-1">{classLabel(cls)} · {item.name} <span className="text-sm font-normal text-gray-600">({planLabel(plan)})</span></h1>
+        <HelpButton topic="score" />
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
@@ -203,7 +212,7 @@ function Entry({ cls, item, mode, initialFilter, setMode, onBack }: { cls: Schoo
           </div>
         </div>
         {!readOnly && (
-          <Button variant="secondary" disabled={!stack.length} onClick={() => void doUndo()}>
+          <Button variant="secondary" disabled={!lastUndo} onClick={() => void doUndo()}>
             ↶ 되돌리기{lastUndoStudent ? ` (${lastUndoStudent.no}번)` : ''}
           </Button>
         )}

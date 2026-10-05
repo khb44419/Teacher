@@ -16,6 +16,7 @@ import { ByteCounter } from '../components/ByteCounter'
 import { studentLabel } from '../components/StudentName'
 import { Button, Card, Modal, useConfirm } from '../components/ui'
 import type { RuleSettings, Score, Student } from '../db/types'
+import { HelpButton } from '../components/Help'
 
 export const SETEUK_TITLE = '교과학습발달상황 - 세부능력 및 특기사항'
 
@@ -57,7 +58,10 @@ export function Seteuk() {
 
   return (
     <div className="space-y-4">
-      <ReportTabs />
+      <div className="flex gap-2 items-center">
+        <div className="flex-1"><ReportTabs /></div>
+        <HelpButton topic="seteuk" />
+      </div>
       <div className="sticky top-0 z-20 bg-yellow-50 border border-yellow-400 rounded-lg p-2 text-sm font-semibold">
         ⚠ 이 문구는 초안이며 교사가 반드시 검토·수정해야 합니다. ({SETEUK_TITLE}, 최대 {rules.seteukMaxBytes.toLocaleString()}바이트)
       </div>

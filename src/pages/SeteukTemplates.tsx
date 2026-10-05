@@ -9,6 +9,7 @@ import { useApp } from '../app/AppContext'
 import { planLabel } from '../lib/plans'
 import { Button, Card, inputCls } from '../components/ui'
 import type { SeteukBand, SeteukTemplate } from '../db/types'
+import { HelpButton } from '../components/Help'
 
 /** 표현 여러 개 = 한 줄에 하나. 칸을 벗어나면 저장. */
 function PhraseBox({ itemId, level, tpl, readOnly, placeholder }: { itemId: number; level: string; tpl?: SeteukTemplate; readOnly: boolean; placeholder: string }) {
@@ -26,7 +27,7 @@ function PhraseBox({ itemId, level, tpl, readOnly, placeholder }: { itemId: numb
 }
 
 export function SeteukTemplates() {
-  const { semester } = useApp()
+  const { semester, detailed } = useApp()
   const [sp, setSp] = useSearchParams()
   const rules = useLiveQuery(() => db.rules.get('main'), [])
   const plans = useLiveQuery(async () => (semester?.id ? db.plans.where('semesterId').equals(semester.id).toArray() : []), [semester?.id])
@@ -48,6 +49,7 @@ export function SeteukTemplates() {
       <div className="flex items-center gap-2">
         <Link to="/seteuk" className="text-brand-700 min-h-11 leading-[44px]">← 세특</Link>
         <h1 className="text-xl font-bold flex-1">🧩 세특 문구 템플릿</h1>
+        <HelpButton topic="templates" />
       </div>
       <Card className="text-sm space-y-1">
         <p>평가 항목·수준별로 문장을 적어 두면, 학생의 점수 수준에 맞는 문장이 골라져 초안이 됩니다. <b>한 줄에 표현 하나</b>씩, 여러 개 적을수록 같은 반 학생들의 문장이 덜 겹칩니다.</p>
@@ -60,7 +62,7 @@ export function SeteukTemplates() {
       </select>
       {!plans.length && <Card>평가 계획이 없습니다. <Link to="/plans" className="text-brand-700 underline">평가 계획 만들기 →</Link></Card>}
 
-      <Card className="space-y-2">
+      {detailed && <Card className="space-y-2">
         <h2 className="font-bold">점수형 항목의 수준 구간</h2>
         <p className="text-sm text-gray-600">득점률(점수/만점)이 기준 이상이면 그 수준의 문장을 씁니다. 수준형 항목은 항목의 수준 이름을 그대로 씁니다.</p>
         {bands.map((b, i) => (
@@ -80,7 +82,7 @@ export function SeteukTemplates() {
             <Button variant="ghost" onClick={() => saveBands(defaultSeteukBands())}>기본값(상 80 / 중 60 / 하 0)</Button>
           </div>
         )}
-      </Card>
+      </Card>}
 
       {items.map((it) => {
         const levels = it.scoring === 'level' ? (it.levels ?? []).map((l) => l.label) : (rules.seteukBands ?? defaultSeteukBands()).map((b) => b.label)

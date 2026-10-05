@@ -14,6 +14,7 @@ import { ExportDialog } from '../components/ExportDialog'
 import { ImportScoresDialog } from '../components/ImportScoresDialog'
 import { Button, Card } from '../components/ui'
 import type { AssessmentItem } from '../db/types'
+import { HelpButton } from '../components/Help'
 
 function Cell({ r, item }: { r?: ItemResult; item: AssessmentItem }) {
   if (!r || r.kind === 'missing') return <td className="p-2 text-center bg-red-50 text-red-700 text-xs">미입력</td>
@@ -69,7 +70,10 @@ export function Report() {
 
   return (
     <div className="space-y-4">
-      <ReportTabs />
+      <div className="flex gap-2 items-center">
+        <div className="flex-1"><ReportTabs /></div>
+        <HelpButton topic="report" />
+      </div>
       <div className="flex gap-2 flex-wrap items-center">
         <div className="flex-1 min-w-48"><ClassSelect semesterId={semester?.id} value={classId} onChange={(id) => setSp({ class: String(id) })} /></div>
         {data && <Button variant="secondary" onClick={() => setDlg('export')}>📤 엑셀 내보내기</Button>}
@@ -82,7 +86,7 @@ export function Report() {
       {data?.plan && (
         <>
           {weightSum(data.items) !== 100 && (
-            <p className="bg-yellow-50 border border-yellow-400 rounded-lg p-2 text-sm">⚠ 반영 비율 합이 {weightSum(data.items)}%입니다. 총점이 100점 만점이 아닐 수 있습니다.</p>
+            <p className="text-sm text-gray-600">참고: 반영 비율 합이 {weightSum(data.items)}%라서 총점이 100점 만점이 아닙니다. (평가 계획에서 고칠 수 있어요)</p>
           )}
           <div className="flex gap-2 items-center flex-wrap text-sm">
             <span>정렬:</span>

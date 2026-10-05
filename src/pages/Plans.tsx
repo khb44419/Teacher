@@ -8,10 +8,11 @@ import { planLabel, weightSum } from '../lib/plans'
 import { Button, Card, Field, Modal, inputCls } from '../components/ui'
 import { CopyPlansDialog } from '../components/CopyPlansDialog'
 import { LibraryDialog } from '../components/LibraryDialog'
+import { HelpButton } from '../components/Help'
 import type { SchoolLevel } from '../db/types'
 
 export function Plans() {
-  const { semester } = useApp()
+  const { semester, detailed } = useApp()
   const nav = useNavigate()
   const [dlg, setDlg] = useState<null | 'new' | 'copy' | 'library'>(null)
   const [level, setLevel] = useState<SchoolLevel>('중')
@@ -48,7 +49,8 @@ export function Plans() {
     <div className="space-y-4">
       <div className="flex items-center gap-2 flex-wrap">
         <h1 className="text-xl font-bold flex-1">평가 계획</h1>
-        <Link to="/plans/history" className="text-brand-700 font-semibold min-h-11 leading-[44px]">🕘 변경 이력</Link>
+        {detailed && <Link to="/plans/history" className="text-brand-700 font-semibold min-h-11 leading-[44px]">🕘 변경 이력</Link>}
+        <HelpButton topic="plans" />
       </div>
       <p className="text-sm text-gray-600">학기 + 학교급 + 학년 + 과목 단위로 계획을 만들면 해당 학년의 모든 반에 자동으로 적용됩니다.</p>
       {readOnly && <p className="bg-gray-100 rounded-lg p-3">마감된 학기의 평가 계획은 읽기 전용입니다.</p>}
@@ -56,7 +58,7 @@ export function Plans() {
         <div className="flex gap-2 flex-wrap">
           <Button onClick={() => setDlg('new')}>＋ 새 평가 계획</Button>
           <Button variant="secondary" onClick={() => setDlg('copy')}>📥 지난 학기·다른 학년 계획 불러오기</Button>
-          <Button variant="secondary" onClick={() => setDlg('library')}>🗂 항목 보관함</Button>
+          {detailed && <Button variant="secondary" onClick={() => setDlg('library')}>🗂 항목 보관함</Button>}
         </div>
       )}
       {msg && <p className="text-sm text-gray-600">{msg}</p>}

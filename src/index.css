@@ -10,4 +10,8 @@
 }
 
 html, body, #root { height: 100%; }
-body { background: #f6f7f6; color: #1f2937; font-size: 17px; }
+body { background: #f6f7f6; color: #1f2937; font-size: 1.0625rem; }
+
+/* 사용법 그림 설명: 자동 넘김 진행 막대 */
+@keyframes help-progress { from { width: 0 } to { width: 100% } }
+.help-progress { animation-name: help-progress; animation-timing-function: linear; animation-fill-mode: forwards; }

@@ -8,6 +8,7 @@ import { useApp } from '../app/AppContext'
 import { limitStatus } from '../lib/bytes'
 import { Button, Card, inputCls, useConfirm } from '../components/ui'
 import type { AbsenceMethod, AbsenceReason, RuleSettings } from '../db/types'
+import { HelpButton } from '../components/Help'
 
 const roundNames = { round: '반올림', floor: '버림', ceil: '올림' } as const
 const methodNames: Record<AbsenceMethod, string> = {
@@ -130,6 +131,7 @@ export function Rules() {
       <div className="flex items-center gap-2">
         <Link to="/settings" className="text-brand-700 min-h-11 leading-[44px]">← 설정</Link>
         <h1 className="text-xl font-bold flex-1">규정 설정</h1>
+        <HelpButton topic="rules" />
       </div>
 
       <div className="sticky top-0 z-10 bg-yellow-50 border border-yellow-400 rounded-lg p-3 text-sm font-semibold">

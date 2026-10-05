@@ -6,6 +6,7 @@ import { useApp } from '../app/AppContext'
 import { BulkClassForm } from '../components/BulkClassForm'
 import { RosterImport } from '../components/RosterImport'
 import { Card, Modal, Button } from '../components/ui'
+import { HelpButton } from '../components/Help'
 
 export function Classes() {
   const { semester } = useApp()
@@ -31,6 +32,7 @@ export function Classes() {
       <div className="flex items-center gap-2 flex-wrap">
         <Link to="/settings" className="text-brand-700 min-h-11 leading-[44px]">← 설정</Link>
         <h1 className="text-xl font-bold flex-1">학급·학생 관리</h1>
+        <HelpButton topic="classes" />
       </div>
       {readOnly && <p className="bg-gray-100 rounded-lg p-3">마감된 학기라 읽기 전용입니다.</p>}
       {!readOnly && semester?.id && (
